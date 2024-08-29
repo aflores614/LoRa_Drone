@@ -4,23 +4,32 @@ from connect_to_vehicle import connect_to_vehicle
 
 serial_port = '/dev/ttyUSB1'
 baud_rate = 115200  # Default baud rate for RYLR998
-target_distance = 5 # distance in meters
-current_distance = 0 # The distance the drone has traveled so far
-velocity_x = 1 # forward speed at 1 m/s
-velocity_y = 0 # Right speed at 0.0 m/s
-velocity_z = 0 # Down speed at 0.0 m/s
-neg_velocity_x = -velocity_x # backward speed at 0.5 m/s
-check_interval = 0.5 # The time interval between each check of the distance
-ALT = 1.1 # fix altitude
-Safe_Dist = 0.75 # safe distance
 
 ser = serial.Serial(serial_port, baud_rate, timeout=1)
 
-def send_command(command):
-    ser.write((command + '\r\n').encode())
-    time.sleep(0.5)  # Wait for the command to be processed
-    response = ser.read_all().decode()
-    return response
+def send_command(ADDRESS, command):
+    command_len = str(len(command))
+    c = ('ALT+SEND=' + str(ADDRESS) + ',' + command_len + ',' + command + '\r\n')
+    print(c)
+    ser.write(('AT+SEND=' + str(ADDRESS) + ',' + command_len + ',' + command + '\r\n').encode())
+   # time.sleep(0.5)  # Wait for the command to be processed
+def get_address():
+    ser.write(('AT+ADDRESS?\r\n').encode())  # Send the AT command to query the address
+    time.sleep(0.5)  # Wait for the response
+    response = ser.read_all().decode()  # Read and decode the response
+    if response.startswith('+'):  # Check if the response is valid
+        parts = response.split('=')  # Split the response at the '=' character
+        print(parts)  # Print the parts for debugging
+        return parts[1].strip()  # Return the address (after '='), stripped of any whitespace
+def get_network():
+    ser.write(('AT+NETWORKID?\r\n').encode())  # Send the AT command to query the address
+    time.sleep(0.5)  # Wait for the response
+    response = ser.read_all().decode()  # Read and decode the response
+    if response.startswith('+'):  # Check if the response is valid
+        parts = response.split('=')  # Split the response at the '=' character
+        print(parts)  # Print the parts for debugging
+        return parts[1].strip()  # Return the address (after '='), stripped of any whitespace
+
 def read_command():
 	while True:
 	
@@ -37,17 +46,14 @@ def read_command():
             
             # Print the separated message components				
 				print(f"Message: {message_payload}")
+				print(f"RSSI: {rssi}")
 
-# Example: Set the LoRa module address
-response = send_command('AT+ADDRESS?')
-print(response)
-response = send_command('AT+NETWORKID?')
-print(response)
 
-master = connect_to_vehicle()
-if master:
-	send_command('AT+SEND=0,7,CONNECT')
-else:
-	send_command('AT+SEND=0,9,UNCONNECT')	
 
+ADDRESS = get_address()
+print("The ADDRESS is: ", ADDRESS)
+network = get_network()
+print("The network is: ", network)
+send_command(ADDRESS, "Andres")
+ 
 ser.close()
