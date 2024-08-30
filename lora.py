@@ -27,7 +27,7 @@ def get_network(ser):
         return parts[1].strip()  # Return the address (after '='), stripped of any whitespace
 
 def read_command(ser):
-    while True:
+    while time.time() < 5: #5 seconds wait time
         string = ser.readline()
         c = string.decode("utf-8")
         if(c != ""):
@@ -39,3 +39,4 @@ def read_command(ser):
                 rssi = parts[3]                     
                 snr = parts[4]   
                 return message_payload
+    return "No input"
