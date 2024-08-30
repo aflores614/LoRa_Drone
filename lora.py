@@ -5,7 +5,7 @@ import time
 
 def send_command(ser, ADDRESS, command):
     command_len = str(len(command))
-    c = ('ALT+SEND=' + str(ADDRESS) + ',' + command_len + ',' + command + '\r\n')
+    c = ('AT+SEND=' + str(ADDRESS) + ',' + command_len + ',' + command + '\r\n')
     print(c)
     ser.write(('AT+SEND=' + str(ADDRESS) + ',' + command_len + ',' + command + '\r\n').encode())
     time.sleep(0.5)  # Wait for the command to be processed
