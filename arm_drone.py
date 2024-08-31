@@ -1,4 +1,5 @@
 from pymavlink import mavutil
+import time
 def arm_drone(master):
     # Send a command to arm the drone
     master.mav.command_long_send(
@@ -23,9 +24,9 @@ def is_armed(master):
         0, 0, 0, 0, 0, 0
     )
     
-    # Receive the status
+    time.sleep(1)
     heartbeat = master.recv_match(type='HEARTBEAT', blocking=True)
-    return heartbeat.base_mode & mavutil.mavlink.MAV_MODE_FLAG_SAFETY_ARMED
+    return heartbeat.base_mode & mavutil.mavlink.MAV_MODE_FLAG_SAFETY_ARMED != 0
 
 
 

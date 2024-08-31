@@ -49,17 +49,24 @@ try:
                 send_command(ser, GC_Address, "ERROR.Invalid input")      
 
         arm_drone(master)
-        time.sleep(2)
-        while not is_armed(master):
+        arm = is_armed(master)
+        
+        while not arm:
             send_command(ser, ADDRESS, "INFO.Drone is not armed")  
-            arm_drone(master)                   
-            time.sleep(3)
+            arm_drone(master)           
+            arm = is_armed(master)
+            print(arm)
 
-        send_command(ser, ADDRESS, "INFO.Drone is armed!")        
+        send_command(ser, ADDRESS, "INFO.Drone is armed!")  
+	      
         time.sleep(5)
         disarm_drone(master)
+        send_command(ser, ADDRESS, "INFO.Drone is disarmed!")  
+	
 
 except KeyboardInterrupt:
     print("Can't connect")
+    sys.exit()
 
 ser.close()
+
