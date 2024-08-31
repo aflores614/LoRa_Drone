@@ -47,17 +47,15 @@ try:
                 sys.exit()
             else:
                 send_command(ser, GC_Address, "ERROR.Invalid input")      
-        
-        while True:
-            arm_drone(master)
-            if is_armed(master):
-		
-                send_command(ser, ADDRESS, "INFO.Drone is armed!")
-                break            
-            else:
-                send_command(ser, ADDRESS, "INFO.Drone is not armed")      
+
+        arm_drone(master)
+        time.sleep(2)
+        while not is_armed(master):
+            send_command(ser, ADDRESS, "INFO.Drone is not armed")  
+            arm_drone(master)                   
             time.sleep(3)
-        
+
+        send_command(ser, ADDRESS, "INFO.Drone is armed!")        
         time.sleep(5)
         disarm_drone(master)
 
