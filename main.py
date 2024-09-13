@@ -12,6 +12,7 @@ from get_location import get_location
 from if_number import is_number_float, is_number_int
 from drone_menu import send_drone_flypath_menu
 from land import land
+
 serial_port = '/dev/ttyUSB1'
 baud_rate = 115200  # Default baud rate for RYLR998
 GC_Address = 1
@@ -53,7 +54,7 @@ try:
                 sys.exit()
             else:
                 send_command(ser, GC_Address, "ERROR.Invalid input")      
-
+        home_lat, home_lon, home_alt = get_location(master)
         arm_drone(master)
         arm = is_armed(master)
         
@@ -85,8 +86,20 @@ try:
                             distance = read_command(ser)  
                         distance = float(distance)                    
                         while current_distance < distance:
-                                fly_movment(master, current_distance, distance, start_lat, start_lon)
+                                current_distance = fly_movment(master, current_distance, distance, start_lat, start_lon)
                         send_command(ser, GC_Address, "INFO.Has reach to the target distance")
+                    case 2:
+                        send_command(ser, GC_Address, "INPUT.Enter Latitude:  ")
+                        waypoint_lat = float(read_command(ser))
+                        send_command(ser, GC_Address, "INPUT.Enter Longitude:  ")
+                        waypoint_lon = float(read_command(ser))
+                        fly_to_waypoint(ser, waypoint_lat, waypoint_lon, altitude )
+                    case 3:
+                        fly_to_waypoint(ser, home_lat, home_lon, altitude )
+                    case 4:
+                        fly_to_waypoint(ser, home_lat, home_lon, altitude )
+                        time.sleep(5)
+                        land()
                     case 7:
                         land()
                         break
