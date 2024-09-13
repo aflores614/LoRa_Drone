@@ -27,7 +27,7 @@ def get_network(ser):
 
 def read_command(ser):
     end_time = time.time() + 10
-    while time.time() < end_time: #5 seconds wait time
+    while time.time() < end_time: #10 seconds wait time
         string = ser.readline()
         c = string.decode("utf-8")
         if(c != ""):

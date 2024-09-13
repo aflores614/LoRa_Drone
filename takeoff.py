@@ -1,7 +1,7 @@
 from pymavlink import mavutil
 from set_mode import set_mode
 import time
-def takeoff(master,altitude,hold_time):
+def takeoff(master,altitude):
     
     if not set_mode(master,'GUIDED'):
         print("Failed to set GUIDED mode. Check GPS signal, pre-arm checks, and parameters.")
@@ -39,7 +39,4 @@ def takeoff(master,altitude,hold_time):
                 return   
         time.sleep(1)
 
-    print("Holding Altitude")
-    time.sleep(hold_time)
-    print("Hold time complete")
  
