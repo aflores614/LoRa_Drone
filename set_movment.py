@@ -5,6 +5,7 @@ import time
 from lidar_distance import get_distance
 from get_location import get_location
 from travel_distance import distance_travel
+from fly_forward import get_waypoint
 
 
 
@@ -21,7 +22,7 @@ def fly_movment(master, Travel_distance, Target_distance, Home_lat, Home_lon):
                                                                                  master.target_component, 
                                                                                  mavutil.mavlink.MAV_FRAME_BODY_OFFSET_NED,
                                                                                  int(0b110111000000), 
-                                                                                 Target_distance, 0, -0.1, 
+                                                                                 Target_distance, 0, -0.5, 
                                                                                  vx, 0 , 0, 
                                                                                  0, 0, 0, 
                                                                                  0, 0 
@@ -37,7 +38,7 @@ def fly_movment(master, Travel_distance, Target_distance, Home_lat, Home_lon):
             print("Current distance travel: ", Travel_distance)
             logging.info("Distance traveled: %.2f meters" % Travel_distance) 
             time.sleep(check_interval)            
-    return Travel_distance
+    
 
     
 def fly_to_waypoint(master, lat, lon, ALT):
@@ -71,3 +72,58 @@ def fly_to_waypoint(master, lat, lon, ALT):
             print("Enroute to target Position")
             logging.info("Enroute to target Position")
         time.sleep(0.1)
+def fly_hover(master, alt):   
+    master.mav.send(mavutil.mavlink.MAVLink_set_position_target_local_ned_message(10, master.target_system,  
+                                                                                 master.target_component, 
+                                                                                 mavutil.mavlink.MAV_FRAME_BODY_OFFSET_NED,
+                                                                                 int(0b110111000000), 
+                                                                                 0, 0, -alt, 
+                                                                                 0, 0 , 0, 
+                                                                                 0, 0, 0, 
+                                                                                 0, 0 
+                                                                                ))
+    master.mav.request_data_stream_send(master.target_system,
+                                        master.target_component,
+                                        mavutil.mavlink.MAV_DATA_STREAM_POSITION,
+                                        1,
+                                        1)
+    start_time = time.time()
+    timeout = 10
+    while True:
+        msg = master.recv_match(type='GLOBAL_POSITION_INT', blocking=True)
+        if msg:
+            relative_altitude = msg.relative_alt/ 1000.0  # Altitude in meters
+            print(f"Current altitude: {relative_altitude}")
+            if relative_altitude >= alt - 0.1:  # Allow a small margin                
+                print(f"Reached target altitude of {alt} meters")
+                break
+            if time.time() - start_time > timeout:
+                print("Timeout reached. Unable to reach target altitude.")
+                return   
+        time.sleep(1)
+def fly_circle(master,radius,dir):
+    altitude = 2.0
+    num_waypoint = 8
+    waypoints_lat = []
+    waypoints_lon = []
+    angle = 0
+    for i in range(num_waypoint):
+        lat, lon = get_waypoint(master, radius, angle)
+        waypoints_lat.append(lat)
+        waypoints_lon.append(lon)
+        angle = angle + (360/num_waypoint)
+        
+    if(dir == 0):
+        for i in range(num_waypoint): #clock-wise fly path
+            lat =  waypoints_lat[i]
+            lon =  waypoints_lon[i]
+            fly_to_waypoint(master, lat, lon, altitude )
+    else:
+        for i in range(num_waypoint): #counterclock-wise fly path
+            lat =  waypoints_lat[num_waypoint - i - 1]
+            lon =  waypoints_lon[num_waypoint - i - 1]
+            fly_to_waypoint(master, lat, lon, altitude )
+
+
+
+        
