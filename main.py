@@ -94,20 +94,38 @@ try:
                         send_command(ser, GC_Address, "INFO.Has reach to the target distance")
                     case 2: #fly to a waypoint
                         send_command(ser, GC_Address, "INPUT.Enter Latitude:  ")
-                        waypoint_lat = float(read_command(ser))
+                        waypoint_lat = read_command(ser)
+                        while not is_number_float(waypoint_lat):       
+                            send_command(ser, GC_Address, "INPUT.Enter Latitude:  ")
+                            waypoint_lat = read_command(ser)
+                        waypoint_lat = float(waypoint_lat)
+
                         send_command(ser, GC_Address, "INPUT.Enter Longitude:  ")
-                        waypoint_lon = float(read_command(ser))
+                        waypoint_lon = read_command(ser)
+                        while not is_number_float(waypoint_lon):       
+                            send_command(ser, GC_Address, "INPUT.Enter Longitude:  ")
+                            waypoint_lon = read_command(ser)
+                        waypoint_lon = float(waypoint_lon)
+
                         fly_to_waypoint(master, waypoint_lat, waypoint_lon, altitude )
                     case 3: #Hover 
                         send_command(ser, GC_Address, "INPUT.Enter atitude:  ")
-                        altitude = float(read_command(ser))
-                        fly_hover(master, altitude )
+                        ALT = read_command(ser)
+                        while not is_number_float(ALT):
+                            send_command(ser, GC_Address, "INPUT.Enter atitude:  ")
+                            ALT = read_command(ser)
+                        ALT = float(ALT)
+                        fly_hover(master, ALT )
                     case 4: #return home
                         fly_to_waypoint(master, home_lat, home_lon, altitude )
                     case 5: #circle mode
                         send_command(ser, GC_Address, "INPUT.Enter Radius:  ")
-                        Radius = float(read_command(ser))
-                        fly_circle(master, Radius, 0) 
+                        Radius = read_command(ser)
+                        while not is_number_float(Radius):
+                            send_command(ser, GC_Address, "INPUT.Enter Radius:  ")
+                            Radius = read_command(ser)
+                        Radius = float(Radius)
+                        fly_circle(master, Radius, 0) #clockwise
                     case 6: #return home and land
                         fly_to_waypoint(master, home_lat, home_lon, altitude )
                         time.sleep(5)
