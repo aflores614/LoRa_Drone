@@ -15,9 +15,9 @@ from travel_distance import distance_travel
 from land import land
 
 
-serial_port = '/dev/ttyUSB1'
+serial_port = '/dev/ttyUSB0'
 baud_rate = 115200  # Default baud rate for RYLR998
-GC_Address = 1
+GC_Address = 2
 altitude = 2.5 #defalut altitude
 
 ser = serial.Serial(serial_port, baud_rate, timeout=1)
