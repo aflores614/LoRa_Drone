@@ -1,5 +1,6 @@
 import serial
 import time
+import logging
 
 
 
@@ -38,5 +39,7 @@ def read_command(ser):
                 message_payload = parts[2]          
                 rssi = parts[3]                     
                 snr = parts[4]   
+                logging.info("Signal Strength: " + rssi)
                 return message_payload
+                
     return "No input"
