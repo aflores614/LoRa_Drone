@@ -13,15 +13,18 @@ from get_location import get_location
 from if_number import is_number_float, is_number_int
 from drone_menu import send_drone_flypath_menu
 from travel_distance import distance_travel
+from check_pre_arm import check_pre_arm
 from land import land
-
+from datetime import datetime
 
 serial_port = '/dev/ttyUSB0'
 baud_rate = 115200  # Default baud rate for RYLR998
 GC_Address = 2
-altitude = 3 #defalut altitude
+altitude = 1.5 #defalut altitude
 
-logging.basicConfig(filename='drone_LoRa_log.log', 
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+log_filename = f"/home/pi/LoRa_Drone/LoRa_Drone/Logs/drone_LoRa_log_{timestamp}.log"
+logging.basicConfig(filename= log_filename, 
                         level=logging.INFO,
                         format='%(asctime)s - %(levelname)s - %(message)s',
                         filemode='w')  
@@ -63,25 +66,41 @@ try:
             elif arm_response == 'n':
                 sys.exit()
             else:
-                send_command(ser, GC_Address, "ERROR.Invalid input")      
-        home_lat, home_lon, home_alt = get_location(master)
-        logging.info("Home Position: %f, %f, %f" % (home_lat, home_lon, home_alt))
-
-        arm_drone(master)
-        arm = is_armed(master)
-        
-        #while not arm:
-            #send_command(ser, GC_Address, "INFO.Drone is not armed")  
-            #arm_drone(master)      
-            #time.sleep(1)     
-            #arm = is_armed(master)
+                send_command(ser, GC_Address, "ERROR.Invalid input")  
+        if check_pre_arm(master):            
+            home_lat, home_lon, home_alt = get_location(master)
+            logging.info("Home Position: %f, %f, %f" % (home_lat, home_lon, home_alt))
+            
+            arm_count = 0
+            max_retries = 5 
+            arm_drone(master)       
+            while not is_armed(master):
+                arm_count += 1
+                send_command(ser, GC_Address, "INFO: Drone is not armed, retrying...")
+                logging.info("Drone not arm retrying")
+                time.sleep(3)
+                arm_drone(master) #Retry to arm the drone
+                
+                if arm_count == max_retries:
+                    send_command(ser, GC_Address, "INFO: ARM Fail")
+                    logging.info("ARM Fail")
+                    sys.exit(1)        
+    
+        else:
+           sys.exit()     
             
         logging.info("Drone is Arm")
         send_command(ser, GC_Address, "INFO.Drone is armed!")  
 	      
-        time.sleep(5)
-
+        #time.sleep(5)
         takeoff(master, altitude)
+        if is_armed(master):            
+            print("System armed")
+        else:
+            print("system fail")
+            sys.exit()
+            
+                
 
         while True:          
             drone_command = send_drone_flypath_menu(ser,GC_Address)
@@ -151,6 +170,15 @@ try:
                         logging.info("Land")
                         land(master)
                         break
+                    case 8: #change alt value
+                        logging.info("Change Altitude Value")
+                        send_command(ser, GC_Address, "INPUT.Enter New Altitude Value:  ")
+                        altitude = read_command(ser)
+                        while not is_number_float(altitude):
+                            send_command(ser, GC_Address, "INPUT.Enter Altitude:  ")
+                            altitude = read_command(ser)
+                        altitude = float(altitude)                       
+                        
                     case _: #error input
                         send_command(ser, GC_Address,"INFO.Invalid input")        
         disarm_drone(master)
@@ -160,6 +188,6 @@ try:
 except KeyboardInterrupt:
     print("Can't connect")
     sys.exit()
-
+logging.info("Script Finish")
 ser.close()
 
