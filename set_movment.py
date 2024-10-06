@@ -29,6 +29,7 @@ def fly_movment(master, Travel_distance, Target_distance, Home_lat, Home_lon):
                                                                                 ))
                                                                                 
     msg = master.recv_match(type='COMMAND_ACK', blocking=True, timeout=5)
+    print(msg)
     if (msg == True and msg.result == mavutil.mavlink.MAV_RESULT_ACCEPTED):
         end_time = time.time() + 1
         #sending velocity commands, they should be re-sent every second   
@@ -56,11 +57,11 @@ def fly_to_waypoint(master, lat, lon, ALT):
         current_lat, current_lon, current_alt = get_location(master)
         
         lat_error = abs(abs(lat) - abs(current_lat))
-        lon_error = abs(abs(lon) - abs(current_lon))
+        lon_error = abs(abs(lon) - abs(current_lon))        
         
-        logging.info("Current Positon", current_lat, current_lon) 
-        logging.info("Error Lat = ", lat_error)
-        logging.info("Error lon = ", lon_error)
+        logging.info("Position: %f, %f, %f" % ( current_lat, current_lon, current_alt))
+        logging.info("Error Lat = %f" % lat_error)
+        logging.info("Error lon = %f" % lon_error)
        
         print("Current Positon", current_lat, current_lon)
         

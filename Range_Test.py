@@ -6,6 +6,7 @@ import logging
 from lora import send_command
 from get_location import get_location
 from travel_distance import distance_travel
+from set_movment import fly_movment
 
 
 check_interval = 0.5
@@ -24,36 +25,34 @@ def rx_test(ser):
                 rssi = parts[3]                     
                 snr = parts[4]   
                 logging.info("Signal Strength: " + rssi)
+                
                 return True
                 
     return False
 
-def test_lora_comm_range(master, ser, GC_Address, Target_distance, Home_lat, Home_lon):
+def tx_test(ser, GC_Address):
+    send_command(ser, GC_Address, "TEST.Hello")
+    rx = rx_test(ser)
+    print(rx)
+    return rx
 
-    Travel_distance = 0
-    master.mav.send(mavutil.mavlink.MAVLink_set_position_target_local_ned_message(10, master.target_system,  
-                                                                                 master.target_component, 
-                                                                                 mavutil.mavlink.MAV_FRAME_BODY_OFFSET_NED,
-                                                                                 int(0b110111000000), 
-                                                                                 Target_distance, 0, -0.5, 
-                                                                                 0.5 , 0 , 0, 
-                                                                                 0, 0, 0, 
-                                                                                 0, 0 
-                                                                                ))
-                                                                                
-    msg = master.recv_match(type='COMMAND_ACK', blocking=True, timeout=5)
-    if (msg == True and msg.result == mavutil.mavlink.MAV_RESULT_ACCEPTED):
-        end_time = time.time() + 1
-        #sending velocity commands, they should be re-sent every second   
-        while Travel_distance <= Target_distance or time.time() < end_time:   
-            Current_lat, Current_lon, Current_alt = get_location(master) 
-            logging.info(Current_lat, Current_lon)
-            Travel_distance = distance_travel(Home_lat, Current_lat, Home_lon, Current_lon)
-            string_travel_distance = "TEST." + str(Travel_distance) + " m"
-            send_command(ser, GC_Address, string_travel_distance)
-            response = rx_test(ser)
-            if(response == False):
-                break            
-            time.sleep(check_interval) 
+def test_lora_comm_range(master, ser, GC_Address, Target_distance):  
+    distance = 0  
+    print( distance < Target_distance)
+    while distance < Target_distance:        
+        current_distance = 0
+        distance_Interve = 1
+        rx = tx_test(ser,GC_Address)
+        if rx == True:
+            start_lat, start_lon, start_alt = get_location(master)
+            logging.info("Current Position: %f, %f, %f" % (start_lat, start_lon, start_alt))
+            fly_movment(master, current_distance, distance_Interve, start_lat, start_lon)
+        else:
+            logging.info("Singal Loss")            
+            return False
+        distance = distance + 1
+    return True
+    
+    
 
 
