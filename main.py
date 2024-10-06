@@ -16,6 +16,7 @@ from travel_distance import distance_travel
 from check_pre_arm import check_pre_arm
 from land import land
 from datetime import datetime
+from Range_Test import test_lora_comm_range
 
 serial_port = '/dev/ttyUSB0'
 baud_rate = 115200  # Default baud rate for RYLR998
@@ -177,7 +178,18 @@ try:
                         while not is_number_float(altitude):
                             send_command(ser, GC_Address, "INPUT.Enter Altitude:  ")
                             altitude = read_command(ser)
-                        altitude = float(altitude)                       
+                        altitude = float(altitude)  
+                    case 9:
+                        logging.info("Testing Commication Range")
+                        send_command(ser, GC_Address, "INPUT.Enter Distance Range:  ")
+                        Target_distance = read_command(ser)
+                        while not is_number_float(Target_distance):
+                            send_command(ser, GC_Address, "INPUT.Enter Distance Range:  ")
+                            Target_distance = read_command(ser)
+                        Target_distance = float(Target_distance)  
+                        test_lora_comm_range(master, ser, GC_Address, Target_distance, home_lat, home_lon)
+                        fly_to_waypoint(master, home_lat, home_lon, altitude )
+
                         
                     case _: #error input
                         send_command(ser, GC_Address,"INFO.Invalid input")        
