@@ -19,7 +19,7 @@ def get_location(master):
             alt = msg.alt/1e3
             print("Got Location")                
             return lat, lon, alt 
-            break
+            
         else:
              print("Waiting ...")
          

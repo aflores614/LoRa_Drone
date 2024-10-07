@@ -21,7 +21,7 @@ from Range_Test import test_lora_comm_range
 serial_port = '/dev/ttyUSB0'
 baud_rate = 115200  # Default baud rate for RYLR998
 GC_Address = 2
-altitude = 1.5 #defalut altitude
+altitude = 2.5 #defalut altitude
 
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 log_filename = f"/home/pi/LoRa_Drone/LoRa_Drone/Logs/drone_LoRa_log_{timestamp}.log"
@@ -75,17 +75,17 @@ try:
             arm_count = 0
             max_retries = 5 
             arm_drone(master)       
-            #while not is_armed(master):
-             #   arm_count += 1
-              #  send_command(ser, GC_Address, "INFO: Drone is not armed, retrying...")
-               # logging.info("Drone not arm retrying")
-                #time.sleep(3)
-                #arm_drone(master) #Retry to arm the drone
+            while not is_armed(master):
+                arm_count += 1
+                send_command(ser, GC_Address, "INFO. Drone is not armed, retrying...")
+                logging.info("Drone not arm retrying")
+                time.sleep(3)
+                arm_drone(master) #Retry to arm the drone
                 
-                #if arm_count == max_retries:
-                 #   send_command(ser, GC_Address, "INFO: ARM Fail")
-                  #  logging.info("ARM Fail")
-                   # sys.exit(1)        
+                if arm_count == max_retries:
+                    send_command(ser, GC_Address, "INFO.ARM Fail, Power OFF")
+                    logging.info("ARM Fail")
+                    sys.exit(1)        
     
         else:
            sys.exit()     
@@ -95,11 +95,11 @@ try:
 	      
         #time.sleep(5)
         takeoff(master, altitude)
-        #if is_armed(master):            
-          #  print("System armed")
-        #else:
-           # print("system fail")
-           # sys.exit()
+        if is_armed(master):            
+            print("System armed")
+        else:
+            print("system fail")
+            sys.exit()
             
                 
 
@@ -188,7 +188,7 @@ try:
                             Target_distance = read_command(ser)
                         Target_distance = float(Target_distance)  
                         
-                        pass_test = test_lora_comm_range(master, ser, GC_Address, Target_distance)
+                        pass_test = test_lora_comm_range(master, ser, GC_Address, Target_distance,altitude)
                         fly_to_waypoint(master, home_lat, home_lon, altitude )
                         if (pass_test == False):
                             land(master)

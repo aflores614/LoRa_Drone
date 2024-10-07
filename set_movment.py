@@ -22,7 +22,7 @@ def fly_movment(master, Travel_distance, Target_distance, Home_lat, Home_lon):
                                                                                  master.target_component, 
                                                                                  mavutil.mavlink.MAV_FRAME_BODY_OFFSET_NED,
                                                                                  int(0b110111000000), 
-                                                                                 Target_distance, 0, -0.5, 
+                                                                                 Target_distance, 0, -1.0, 
                                                                                  vx, 0 , 0, 
                                                                                  0, 0, 0, 
                                                                                  0, 0 
@@ -60,8 +60,6 @@ def fly_to_waypoint(master, lat, lon, ALT):
         lon_error = abs(abs(lon) - abs(current_lon))        
         
         logging.info("Position: %f, %f, %f" % ( current_lat, current_lon, current_alt))
-        logging.info("Error Lat = %f" % lat_error)
-        logging.info("Error lon = %f" % lon_error)
        
         print("Current Positon", current_lat, current_lon)
         
