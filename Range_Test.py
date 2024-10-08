@@ -3,10 +3,12 @@ import serial
 import time
 import sys
 import logging
+from connect_to_vehicle import connect_to_vehicle
 from lora import send_command
 from get_location import get_location
 from travel_distance import distance_travel
-from set_movment import fly_movment
+from set_movment import fly_movment, fly_to_waypoint
+from fly_forward import get_waypoint
 
 
 check_interval = 0.5
@@ -39,24 +41,28 @@ def tx_test(ser, GC_Address):
 def test_lora_comm_range(master, ser, GC_Address, Target_distance, altitude):  
     distance = 0  
     i = 0
-    num_waypoint = round(Target_distance/2)
+    num_waypoint = round(Target_distance*.1)
     waypoints_lat = []
     waypoints_lon = []
     angle = 0
     intervals = Target_distance/num_waypoint
+    print(num_waypoint, intervals) 
+
+    logging.info("Total Distance for LoRa Comm Test: %f" % Target_distance)
     for n in range(num_waypoint):
-        lat, lon = get_waypoint(master, intervals, angle)
+        lat, lon = get_waypoint(master, n*intervals, angle)
         waypoints_lat.append(lat)
         waypoints_lon.append(lon)
-              
+        print(lat, lon)
+        logging.info("Waypoints : %f, %f" % (lat, lon))
 
     while distance < Target_distance:        
         rx = tx_test(ser,GC_Address)
         if rx  and i < num_waypoint:
             lat =  waypoints_lat[i]
             lon =  waypoints_lon[i]
-            start_lat, start_lon, start_alt = get_location(master)
-            logging.info("Current Position: %f, %f, %f" % (start_lat, start_lon, start_alt))
+            current_lat, current_lon, current_alt = get_location(master)
+            logging.info("Current Position: %f, %f, %f" % (current_lat, current_lon, current_alt))
             fly_to_waypoint(master, lat, lon, altitude )
             i += 1
             
@@ -67,5 +73,10 @@ def test_lora_comm_range(master, ser, GC_Address, Target_distance, altitude):
     return True
     
     
-
-
+if __name__ == "__main__":
+    
+    serial_port = '/dev/ttyUSB0'
+    baud_rate = 115200  # Default baud rate for RYLR998
+    ser = serial.Serial(serial_port, baud_rate, timeout=1)
+    master = connect_to_vehicle()
+    test = test_lora_comm_range(master, ser, 1, 250, 1.5)

@@ -17,7 +17,7 @@ def get_location(master):
             lat = msg.lat/1e7
             lon = msg.lon/1e7
             alt = msg.alt/1e3
-            print("Got Location")                
+                          
             return lat, lon, alt 
             
         else:

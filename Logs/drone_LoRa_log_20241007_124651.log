@@ -1,0 +1,12 @@
+2024-10-07 12:46:51,208 - INFO - Start
+2024-10-07 12:46:54,966 - INFO - Signal Strength: -34
+2024-10-07 12:46:54,966 - INFO - Connect to Drone?
+2024-10-07 12:47:00,502 - INFO - Signal Strength: -34
+2024-10-07 12:47:00,503 - INFO - Arm Drone?
+2024-10-07 12:47:00,507 - INFO - Home Position: 34.199958, -118.525610, 238.970000
+2024-10-07 12:47:02,010 - INFO - Drone not arm retrying
+2024-10-07 12:47:06,515 - INFO - Drone not arm retrying
+2024-10-07 12:47:11,020 - INFO - Drone not arm retrying
+2024-10-07 12:47:15,526 - INFO - Drone not arm retrying
+2024-10-07 12:47:49,283 - INFO - Drone not arm retrying
+2024-10-07 12:47:52,788 - INFO - ARM Fail

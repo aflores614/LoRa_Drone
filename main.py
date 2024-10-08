@@ -76,16 +76,16 @@ try:
             max_retries = 5 
             arm_drone(master)       
             while not is_armed(master):
-                arm_count += 1
-                send_command(ser, GC_Address, "INFO. Drone is not armed, retrying...")
-                logging.info("Drone not arm retrying")
-                time.sleep(3)
-                arm_drone(master) #Retry to arm the drone
+              arm_count += 1
+              send_command(ser, GC_Address, "INFO. Drone is not armed retrying...")
+              logging.info("Drone not arm retrying")
+              time.sleep(3)
+              arm_drone(master) #Retry to arm the drone
                 
-                if arm_count == max_retries:
-                    send_command(ser, GC_Address, "INFO.ARM Fail, Power OFF")
-                    logging.info("ARM Fail")
-                    sys.exit(1)        
+              if arm_count == max_retries:
+                  send_command(ser, GC_Address, "INFO.ARM Fail, Power OFF")
+                  logging.info("ARM Fail")
+                  sys.exit(1)        
     
         else:
            sys.exit()     
@@ -93,12 +93,14 @@ try:
         logging.info("Drone is Arm")
         send_command(ser, GC_Address, "INFO.Drone is armed!")  
 	      
-        #time.sleep(5)
+      
         takeoff(master, altitude)
-        if is_armed(master):            
+        if is_armed(master):      
+            send_command(ser, GC_Address, "INFO.Drone Ready!")  
             print("System armed")
         else:
             print("system fail")
+            send_command(ser, GC_Address, "INFO.ARM Fail, Power OFF")
             sys.exit()
             
                 
