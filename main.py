@@ -21,10 +21,10 @@ from Range_Test import test_lora_comm_range
 serial_port = '/dev/ttyUSB0'
 baud_rate = 115200  # Default baud rate for RYLR998
 GC_Address = 2
-altitude = 2.5 #defalut altitude
+altitude = 5 #defalut altitude
 
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-log_filename = f"/home/pi/LoRa_Drone/LoRa_Drone/Logs/drone_LoRa_log_{timestamp}.log"
+log_filename = f"/home/pi/Drone_Test_Logs/drone_LoRa_log_{timestamp}.log"
 logging.basicConfig(filename= log_filename, 
                         level=logging.INFO,
                         format='%(asctime)s - %(levelname)s - %(message)s',
@@ -47,8 +47,10 @@ try:
         print(response)
         
         if response == 'y':
+            logging.info("Yes")
             break
         elif response == 'n':
+            logging.info("No System OFF")
             sys.exit()
         else:
             send_command(ser, GC_Address, "ERROR.Invalid input")
@@ -63,8 +65,10 @@ try:
             arm_response = read_command(ser)
             logging.info("Arm Drone?")
             if arm_response == 'y':
+                logging.info("Yes")
                 break
             elif arm_response == 'n':
+                logging.info("No System OFF")
                 sys.exit()
             else:
                 send_command(ser, GC_Address, "ERROR.Invalid input")  
@@ -79,11 +83,11 @@ try:
               arm_count += 1
               send_command(ser, GC_Address, "INFO. Drone is not armed retrying...")
               logging.info("Drone not arm retrying")
-              time.sleep(3)
+              time.sleep(5)
               arm_drone(master) #Retry to arm the drone
                 
               if arm_count == max_retries:
-                  send_command(ser, GC_Address, "INFO.ARM Fail, Power OFF")
+                  send_command(ser, GC_Address, "INFO.ARM Fail Power OFF")
                   logging.info("ARM Fail")
                   sys.exit(1)        
     
@@ -120,7 +124,8 @@ try:
                             send_command(ser, GC_Address, "INPUT.Enter valid Distance value")
                             distance = read_command(ser)  
                         distance = float(distance)                    
-                        while current_distance < distance:                               
+                        while current_distance < distance: 
+                                                        
                                 fly_movment(master, current_distance, distance, start_lat, start_lon)
                                 Current_lat, Current_lon, Current_alt = get_location(master)
                                 current_distance = distance_travel(home_lat, Current_lat, home_lon, Current_lon)
@@ -163,7 +168,7 @@ try:
                             send_command(ser, GC_Address, "INPUT.Enter Radius:  ")
                             Radius = read_command(ser)
                         Radius = float(Radius)
-                        fly_circle(master, Radius, 0) #clockwise
+                        fly_circle(master, Radius,altitude, 0) #clockwise
                     case 6: #return home and land
                         logging.info("Return Home and Land")
                         fly_to_waypoint(master, home_lat, home_lon, altitude )

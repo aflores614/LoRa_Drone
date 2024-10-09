@@ -9,7 +9,7 @@ from get_location import get_location
 from travel_distance import distance_travel
 from set_movment import fly_movment, fly_to_waypoint
 from fly_forward import get_waypoint
-
+from datetime import datetime
 
 check_interval = 0.5
 
@@ -41,7 +41,7 @@ def tx_test(ser, GC_Address):
 def test_lora_comm_range(master, ser, GC_Address, Target_distance, altitude):  
     distance = 0  
     i = 0
-    num_waypoint = round(Target_distance*.1)
+    num_waypoint = 4 
     waypoints_lat = []
     waypoints_lon = []
     angle = 0
@@ -52,31 +52,41 @@ def test_lora_comm_range(master, ser, GC_Address, Target_distance, altitude):
     for n in range(num_waypoint):
         lat, lon = get_waypoint(master, n*intervals, angle)
         waypoints_lat.append(lat)
-        waypoints_lon.append(lon)
-        print(lat, lon)
+        waypoints_lon.append(lon)        
         logging.info("Waypoints : %f, %f" % (lat, lon))
-
+    
     while distance < Target_distance:        
         rx = tx_test(ser,GC_Address)
         if rx  and i < num_waypoint:
             lat =  waypoints_lat[i]
             lon =  waypoints_lon[i]
             current_lat, current_lon, current_alt = get_location(master)
+            logging.info("Point %f complete " % (i+1))
             logging.info("Current Position: %f, %f, %f" % (current_lat, current_lon, current_alt))
-            fly_to_waypoint(master, lat, lon, altitude )
+            #fly_to_waypoint(master, lat, lon, altitude )
+            
             i += 1
             
         else:
             logging.info("Singal Loss")            
             return False
         distance += intervals
+    logging.info("Test Past of %f meters" % distance)
     return True
     
     
 if __name__ == "__main__":
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    log_filename = f"/home/pi/random_logs/drone_LoRa_log_{timestamp}.log"
+    logging.basicConfig(filename= log_filename, 
+                        level=logging.INFO,
+                        format='%(asctime)s - %(levelname)s - %(message)s',
+                        filemode='w')  
+    logging.info("Start")
     
     serial_port = '/dev/ttyUSB0'
     baud_rate = 115200  # Default baud rate for RYLR998
     ser = serial.Serial(serial_port, baud_rate, timeout=1)
     master = connect_to_vehicle()
-    test = test_lora_comm_range(master, ser, 1, 250, 1.5)
+    send_command(ser, 2, "INFO.Test")
+    test = test_lora_comm_range(master, ser, 2, 300, 1.5)

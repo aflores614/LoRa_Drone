@@ -1,9 +1,0 @@
-2024-10-07 12:47:49,657 - INFO - Start
-2024-10-07 12:47:52,094 - INFO - Signal Strength: -33
-2024-10-07 12:47:52,095 - INFO - Connect to Drone?
-2024-10-07 12:47:56,308 - INFO - Signal Strength: -33
-2024-10-07 12:47:56,308 - INFO - Arm Drone?
-2024-10-07 12:47:56,312 - INFO - Home Position: 34.199933, -118.525608, 244.480000
-2024-10-07 12:47:57,817 - INFO - Drone not arm retrying
-2024-10-07 12:48:02,322 - INFO - Drone not arm retrying
-2024-10-07 12:48:06,329 - INFO - Drone is Arm

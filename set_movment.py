@@ -21,9 +21,9 @@ def fly_movment(master, Travel_distance, Target_distance, Home_lat, Home_lon):
     master.mav.send(mavutil.mavlink.MAVLink_set_position_target_local_ned_message(10, master.target_system,  
                                                                                  master.target_component, 
                                                                                  mavutil.mavlink.MAV_FRAME_BODY_OFFSET_NED,
-                                                                                 int(0b110111000000), 
-                                                                                 Target_distance, 0, -1.0, 
-                                                                                 vx, 0 , 0, 
+                                                                                 int(0b110111111000 ), 
+                                                                                 Target_distance, 0, 0, 
+                                                                                 0, 0 , 0, 
                                                                                  0, 0, 0, 
                                                                                  0, 0 
                                                                                 ))
@@ -45,7 +45,7 @@ def fly_movment(master, Travel_distance, Target_distance, Home_lat, Home_lon):
 def fly_to_waypoint(master, lat, lon, ALT):
     master.mav.send(mavutil.mavlink.MAVLink_set_position_target_global_int_message(10, master.target_system,  
                                                                                  master.target_component, 
-                                                                                 mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,
+                                                                                 mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT_INT,
                                                                                  int(0b110111111000), 
                                                                                  int(lat*1e7), int(lon* 1e7), ALT, 
                                                                                  0, 0 , 0, 
@@ -53,15 +53,13 @@ def fly_to_waypoint(master, lat, lon, ALT):
                                                                                  0, 0 
                                                                                 ))
     tolerance=0.00001 # how close the drone needs to get to the target position before the loop breaks
+    
     while True:
         current_lat, current_lon, current_alt = get_location(master)
         
         lat_error = abs(abs(lat) - abs(current_lat))
         lon_error = abs(abs(lon) - abs(current_lon))        
-        
-        logging.info("Position: %f, %f, %f" % ( current_lat, current_lon, current_alt))
-       
-        print("Current Positon", current_lat, current_lon)
+    
         
         if(lat_error < tolerance and lon_error < tolerance ):
             print("Reach target position")
@@ -70,7 +68,7 @@ def fly_to_waypoint(master, lat, lon, ALT):
         else:
             print("Enroute to target Position")
             logging.info("Enroute to target Position")
-        time.sleep(0.1)
+        time.sleep(0.25)
 def fly_hover(master, alt):   
     master.mav.send(mavutil.mavlink.MAVLink_set_position_target_local_ned_message(10, master.target_system,  
                                                                                  master.target_component, 
@@ -100,8 +98,8 @@ def fly_hover(master, alt):
                 print("Timeout reached. Unable to reach target altitude.")
                 return   
         time.sleep(1)
-def fly_circle(master,radius,dir):
-    altitude = 2.0
+def fly_circle(master,radius,altitude,dir):
+    
     num_waypoint = 8
     waypoints_lat = []
     waypoints_lon = []
