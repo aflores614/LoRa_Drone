@@ -71,7 +71,7 @@ try:
                 logging.info("No System OFF")
                 sys.exit()
             else:
-                send_command(ser, GC_Address, "ERROR.Invalid input")  
+                send_command(ser, GC_Address, "INFO.Invalid input")  
         if check_pre_arm(master):            
             home_lat, home_lon, home_alt = get_location(master)
             logging.info("Home Position: %f, %f, %f" % (home_lat, home_lon, home_alt))
@@ -81,7 +81,7 @@ try:
             arm_drone(master)       
             while not is_armed(master):
               arm_count += 1
-              send_command(ser, GC_Address, "INFO. Drone is not armed retrying...")
+              send_command(ser, GC_Address, "INFO.Drone is not armed retrying...")
               logging.info("Drone not arm retrying")
               time.sleep(5)
               arm_drone(master) #Retry to arm the drone
@@ -130,7 +130,7 @@ try:
                                 Current_lat, Current_lon, Current_alt = get_location(master)
                                 current_distance = distance_travel(home_lat, Current_lat, home_lon, Current_lon)
                                 logging.info("Current Position: %f, %f, %f" % (Current_lat, Current_lon, Current_alt))
-                        send_command(ser, GC_Address, "INFO.Has reach to the target distance")
+                        send_command(ser, GC_Address, "ACK.Has reach to the target distance")
                     case 2: #fly to a waypoint
                         logging.info("Fly to a Waypoint")
                         send_command(ser, GC_Address, "INPUT.Enter Latitude:  ")

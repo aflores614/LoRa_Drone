@@ -59,11 +59,13 @@ def test_lora_comm_range(master, ser, GC_Address, Target_distance, altitude):
         rx = tx_test(ser,GC_Address)
         if rx  and i < num_waypoint:
             lat =  waypoints_lat[i]
-            lon =  waypoints_lon[i]
+            lon =  waypoints_lon[i]            
+            #fly_to_waypoint(master, lat, lon, altitude )
             current_lat, current_lon, current_alt = get_location(master)
             logging.info("Point %f complete " % (i+1))
             logging.info("Current Position: %f, %f, %f" % (current_lat, current_lon, current_alt))
-            #fly_to_waypoint(master, lat, lon, altitude )
+            message = "INFO.Waypoint " + str(i+1) + "/" + str(num_waypoint) 
+            send_command(ser, GC_Address, message)
             
             i += 1
             
