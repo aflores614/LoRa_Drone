@@ -1,7 +1,15 @@
 from pymavlink import mavutil
 import time
+from lora import send_command
+import serial
 
-def get_location(master):    
+
+GC_Address = 2
+serial_port = '/dev/ttyUSB0'
+baud_rate = 115200  # Default baud rate for RYLR998
+ser = serial.Serial(serial_port, baud_rate, timeout=1)
+
+def get_location(master,ser):    
     master.mav.command_long_send(
             master.target_system,
             master.target_component,
@@ -21,5 +29,8 @@ def get_location(master):
             return lat, lon, alt 
             
         else:
-             print("Waiting ...")
-         
+            send_command(ser, GC_Address, "Waiting..." )
+            print("Waiting ...")
+           
+
+            

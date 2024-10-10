@@ -38,10 +38,10 @@ def tx_test(ser, GC_Address):
     print(rx)
     return rx
 
-def test_lora_comm_range(master, ser, GC_Address, Target_distance, altitude):  
+def test_lora_comm_range(master, ser, GC_Address, Target_distance, altitude, home_lat, home_lon):  
     distance = 0  
     i = 0
-    num_waypoint = 4 
+    num_waypoint = 10 
     waypoints_lat = []
     waypoints_lon = []
     angle = 0
@@ -62,7 +62,7 @@ def test_lora_comm_range(master, ser, GC_Address, Target_distance, altitude):
             lon =  waypoints_lon[i]            
             fly_to_waypoint(master, lat, lon, altitude )            
             logging.info("Point %f complete " % (i+1))
-            message = "INFO.Waypoint " + str(i+1) + "/" + str(num_waypoint) 
+            message = "ACK.Waypoint " + str(i+1) + "/" + str(num_waypoint) 
             send_command(ser, GC_Address, message)
             
             i += 1
@@ -71,6 +71,10 @@ def test_lora_comm_range(master, ser, GC_Address, Target_distance, altitude):
             logging.info("Singal Loss")            
             return False
         distance += intervals
+
+    send_command(ser, GC_Address, "ACK.Flying back Home")   
+    fly_to_waypoint(master, home_lat, home_lon, altitude )
+
     logging.info("Test Past of %f meters" % distance)
     return True
     

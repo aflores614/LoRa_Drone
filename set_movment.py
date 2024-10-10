@@ -2,6 +2,7 @@ from pymavlink import mavutil
 import logging
 import math
 import time
+import signal
 from lidar_distance import get_distance
 from get_location import get_location
 from travel_distance import distance_travel
@@ -11,6 +12,10 @@ from fly_forward import get_waypoint
 
 check_interval = 0.5
 vx = 1
+class TimeoutException(Exception):
+    pass
+def handler(signum, frame):
+    raise TimeoutException()
 
 def fly_movment(master, Travel_distance, Target_distance, Home_lat, Home_lon):
    
@@ -54,12 +59,13 @@ def fly_to_waypoint(master, lat, lon, ALT):
                                                                                 ))
     tolerance=0.00001 # how close the drone needs to get to the target position before the loop breaks
     
-    while True:
+    while True:     
         current_lat, current_lon, current_alt = get_location(master)
-        
         lat_error = abs(abs(lat) - abs(current_lat))
         lon_error = abs(abs(lon) - abs(current_lon))        
-    
+
+        print(current_alt)
+
         
         if(lat_error < tolerance and lon_error < tolerance ):
             print("Reach target position")
@@ -69,6 +75,7 @@ def fly_to_waypoint(master, lat, lon, ALT):
             print("Enroute to target Position")
             logging.info("Enroute to target Position")
         time.sleep(0.25)
+
 def fly_hover(master, alt):   
     master.mav.send(mavutil.mavlink.MAVLink_set_position_target_local_ned_message(10, master.target_system,  
                                                                                  master.target_component, 

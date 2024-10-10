@@ -195,8 +195,7 @@ try:
                             Target_distance = read_command(ser)
                         Target_distance = float(Target_distance)  
                         
-                        pass_test = test_lora_comm_range(master, ser, GC_Address, Target_distance,altitude)
-                        fly_to_waypoint(master, home_lat, home_lon, altitude )
+                        pass_test = test_lora_comm_range(master, ser, GC_Address, Target_distance,altitude,home_lat, home_lon)                        
                         if (pass_test == False):
                             land(master)
                             break
