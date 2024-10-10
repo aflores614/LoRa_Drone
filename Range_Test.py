@@ -54,7 +54,9 @@ def test_lora_comm_range(master, ser, GC_Address, Target_distance, altitude, hom
         waypoints_lat.append(lat)
         waypoints_lon.append(lon)        
         logging.info("Waypoints : %f, %f" % (lat, lon))
-    
+        message = "INFO.Calcuate Waypoint " + str(n+1) + "/" + str(num_waypoint)
+        send_command (ser, GC_Address, message) 
+    send_command (ser, GC_Address, "INFO.Start Test") 
     while distance < Target_distance:        
         rx = tx_test(ser,GC_Address)
         if rx  and i < num_waypoint:
@@ -93,4 +95,6 @@ if __name__ == "__main__":
     ser = serial.Serial(serial_port, baud_rate, timeout=1)
     master = connect_to_vehicle()
     send_command(ser, 2, "INFO.Test")
-    test = test_lora_comm_range(master, ser, 2, 300, 1.5)
+    home_lat, home_lon, home_alt = get_location(master)
+    print(home_lat, home_lon, home_alt)
+    test = test_lora_comm_range(master, ser, 2, 300, 1.5, home_lat, home_lon)

@@ -64,7 +64,7 @@ def fly_to_waypoint(master, lat, lon, ALT):
         lat_error = abs(abs(lat) - abs(current_lat))
         lon_error = abs(abs(lon) - abs(current_lon))        
 
-        print(current_alt)
+       
 
         
         if(lat_error < tolerance and lon_error < tolerance ):
@@ -74,7 +74,7 @@ def fly_to_waypoint(master, lat, lon, ALT):
         else:
             print("Enroute to target Position")
             logging.info("Enroute to target Position")
-        time.sleep(0.25)
+        time.sleep(1)
 
 def fly_hover(master, alt):   
     master.mav.send(mavutil.mavlink.MAVLink_set_position_target_local_ned_message(10, master.target_system,  

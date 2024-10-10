@@ -197,6 +197,8 @@ try:
                         
                         pass_test = test_lora_comm_range(master, ser, GC_Address, Target_distance,altitude,home_lat, home_lon)                        
                         if (pass_test == False):
+                            logging.info("LoRa Range has max out")
+                            fly_to_waypoint(master, home_lat, home_lon, altitude )
                             land(master)
                             break
                         
