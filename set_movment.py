@@ -110,7 +110,7 @@ def increse_alt(master, alt):
                 print("Timeout reached. Unable to reach target altitude.")
                 return   
         time.sleep(1)
-def fly_circle(master,radius,altitude,dir):
+def fly_circle(master,radius,altitude,dir,ALT_Above_Sealevel):
     
     num_waypoint = 8
     waypoints_lat = []
@@ -128,7 +128,7 @@ def fly_circle(master,radius,altitude,dir):
         for i in range(num_waypoint): #clock-wise fly path
             lat =  waypoints_lat[i]
             lon =  waypoints_lon[i]
-            fly_to_waypoint(master, lat, lon, altitude )
+            fly_to_waypoint(master, lat, lon, altitude,ALT_Above_Sealevel )
             logging.info("Point %f complete " % (i+1))
             message = "ACK.Circle Waypoint " + str(i+1) + "/" + str(num_waypoint) 
             send_command(ser, GC_Address, message)
@@ -136,7 +136,7 @@ def fly_circle(master,radius,altitude,dir):
         for i in range(num_waypoint): #counterclock-wise fly path
             lat =  waypoints_lat[num_waypoint - i - 1]
             lon =  waypoints_lon[num_waypoint - i - 1]
-            fly_to_waypoint(master, lat, lon, altitude )
+            fly_to_waypoint(master, lat, lon, altitude,ALT_Above_Sealevel )
             logging.info("Point %f complete " % (i+1))
             message = "ACK.Circle Waypoint " + str(i+1) + "/" + str(num_waypoint) 
             send_command(ser, GC_Address, message)
