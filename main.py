@@ -86,7 +86,7 @@ try:
               if arm_count == max_retries:
                   send_command(ser, GC_Address, "INFO.ARM Fail Power OFF")
                   logging.info("ARM Fail")
-                  sys.exit(1)        
+                         
     
         else:
            sys.exit()     
