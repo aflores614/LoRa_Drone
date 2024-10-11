@@ -65,7 +65,8 @@ def fly_to_waypoint(master, lat, lon, ALT, ALT_Above_Sealevel):
             lat_error = abs(abs(lat) - abs(current_lat))
             lon_error = abs(abs(lon) - abs(current_lon))        
             alt_error = abs(ALT_Above_Sealevel - current_alt)
-       
+            send_command(ser, GC_Address, "INFO."+ str(current_alt - ALT_Above_Sealevel))          
+            
             if(alt_error < alt_tolerance ):        
                 if(lat_error < tolerance and lon_error < tolerance ):
                     logging.info("Reach Target Position")

@@ -38,7 +38,7 @@ def tx_test(ser, GC_Address):
     print(rx)
     return rx
 
-def test_lora_comm_range(master, ser, GC_Address, Target_distance, altitude, home_lat, home_lon):  
+def test_lora_comm_range(master, ser, GC_Address, Target_distance, altitude, home_lat, home_lon,ALT_Above_SEALEAVE):  
     distance = 0  
     i = 0
     num_waypoint = 10 
@@ -50,6 +50,7 @@ def test_lora_comm_range(master, ser, GC_Address, Target_distance, altitude, hom
 
     logging.info("Total Distance for LoRa Comm Test: %f" % Target_distance)
     for n in range(num_waypoint):
+        print("Point " , n)
         lat, lon = get_waypoint(master, n*intervals, angle)
         waypoints_lat.append(lat)
         waypoints_lon.append(lon)        
@@ -62,7 +63,7 @@ def test_lora_comm_range(master, ser, GC_Address, Target_distance, altitude, hom
         if rx  and i < num_waypoint:
             lat =  waypoints_lat[i]
             lon =  waypoints_lon[i]            
-            fly_to_waypoint(master, lat, lon, altitude )            
+            fly_to_waypoint(master, lat, lon, altitude, ALT_Above_SEALEAVE)            
             logging.info("Point %f complete " % (i+1))
             message = "ACK.Waypoint " + str(i+1) + "/" + str(num_waypoint) 
             send_command(ser, GC_Address, message)
@@ -75,7 +76,7 @@ def test_lora_comm_range(master, ser, GC_Address, Target_distance, altitude, hom
         distance += intervals
 
     send_command(ser, GC_Address, "ACK.Flying back Home")   
-    fly_to_waypoint(master, home_lat, home_lon, altitude )
+    fly_to_waypoint(master, home_lat, home_lon, altitude, ALT_Above_SEALEAVE )
 
     logging.info("Test Past of %f meters" % distance)
     return True
@@ -93,8 +94,14 @@ if __name__ == "__main__":
     serial_port = '/dev/ttyUSB0'
     baud_rate = 115200  # Default baud rate for RYLR998
     ser = serial.Serial(serial_port, baud_rate, timeout=1)
+    alt = 10
     master = connect_to_vehicle()
     send_command(ser, 2, "INFO.Test")
     home_lat, home_lon, home_alt = get_location(master)
+    ALT_Above_SEALEAVE = home_alt + alt
     print(home_lat, home_lon, home_alt)
-    test = test_lora_comm_range(master, ser, 2, 300, 1.5, home_lat, home_lon)
+    try:
+        test = test_lora_comm_range(master, ser, 2, 300, alt, home_lat, home_lon,ALT_Above_SEALEAVE)
+    except Exception as e:
+        send_command(ser, 2, "INFO.ERROR")
+        print("ERROR")

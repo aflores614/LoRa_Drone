@@ -146,7 +146,7 @@ try:
                                 waypoint_lon = read_command(ser)
                             waypoint_lon = float(waypoint_lon)
 
-                            fly_to_waypoint(master, waypoint_lat, waypoint_lon, altitude )
+                            fly_to_waypoint(master, waypoint_lat, waypoint_lon, altitude, ALT_Above_SEALEAVE )
                         except Exception as e:
                             logging.error("Fly to a Waypoint ERROR: %s", str(e), exc_info=True)
                             send_command(ser, GC_Address, "INFO.Fly to a Waypoint ERROR")
@@ -161,7 +161,7 @@ try:
                         increse_alt(master, ALT )
                     case 4: #return home
                         logging.info("Return Home")
-                        fly_to_waypoint(master, home_lat, home_lon, altitude )
+                        fly_to_waypoint(master, home_lat, home_lon, altitude,ALT_Above_SEALEAVE )
                     case 5: #circle mode
                         logging.info("Circle Mode")
                         send_command(ser, GC_Address, "INPUT.Enter Radius:  ")
@@ -170,11 +170,11 @@ try:
                             send_command(ser, GC_Address, "INPUT.Enter Radius:  ")
                             Radius = read_command(ser)
                         Radius = float(Radius)
-                        fly_circle(master, Radius,altitude, 0) #clockwise
+                        fly_circle(master, Radius,altitude, 0,ALT_Above_SEALEAVE) #clockwise
                     case 6: #return home and land
                         try:
                             logging.info("Return Home and Land")
-                            fly_to_waypoint(master, home_lat, home_lon, altitude )
+                            fly_to_waypoint(master, home_lat, home_lon, altitude,ALT_Above_SEALEAVE )
                             time.sleep(5)
                             land(master)
                         except Exception as e:
@@ -203,10 +203,10 @@ try:
                                 Target_distance = read_command(ser)
                             Target_distance = float(Target_distance)  
                         
-                            pass_test = test_lora_comm_range(master, ser, GC_Address, Target_distance,altitude,home_lat, home_lon)                        
+                            pass_test = test_lora_comm_range(master, ser, GC_Address, Target_distance,altitude,home_lat, home_lon,ALT_Above_SEALEAVE)                        
                             if (pass_test == False):
                                 logging.info("LoRa Range has max out")
-                                fly_to_waypoint(master, home_lat, home_lon, altitude )
+                                fly_to_waypoint(master, home_lat, home_lon, altitude,ALT_Above_SEALEAVE )
                                 land(master)
                                 break
                         except Exception as e:
@@ -225,10 +225,11 @@ try:
             send_command(ser, GC_Address, "INFO.Drone Menu ERROR")
 
 except KeyboardInterrupt:
-    logging.info("Can't Connect")
-    send_command(ser, GC_Address, "INFO.Can't Connect")
+    logging.info("User On Rasberry pi Cancel")
+    send_command(ser, GC_Address, "INFO.User On Rasberry pi Cancel")
 finally:
     logging.info("Script Finish")
+    send_command(ser, GC_Address, "INFO.FInish")
     ser.close()
     logging.shutdown() 
     sys.exit()
