@@ -14,8 +14,6 @@ def get_waypoint(master, distance, angle):
     New_lat = math.degrees(New_lat) 
     New_lon = math.degrees(New_lon) 
 
-    #print(f"Latitude: {lat}, Longitude: {lon}, Altitude: {10}")
-    #print(f"New Latitude: {New_lat}, New Longitude: {New_lon }, Altitude: {10}")
     return New_lat, New_lon
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@ from arm_drone import arm_drone, is_armed
 from disarm_drone import disarm_drone
 from lora import send_command, get_address, get_network, read_command
 from takeoff import takeoff
-from set_movment import fly_movment, fly_to_waypoint, fly_hover,fly_circle
+from set_movment import fly_movment, fly_to_waypoint, increse_alt,fly_circle
 from get_location import get_location
 from if_number import is_number_float, is_number_int
 from drone_menu import send_drone_flypath_menu
@@ -17,19 +17,16 @@ from check_pre_arm import check_pre_arm
 from land import land
 from datetime import datetime
 from Range_Test import test_lora_comm_range
+from log_file import setup_log_file
+
+setup_log_file()
 
 serial_port = '/dev/ttyUSB0'
 baud_rate = 115200  # Default baud rate for RYLR998
 GC_Address = 2
 altitude = 5 #defalut altitude
 
-timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-log_filename = f"/home/pi/Drone_Test_Logs/drone_LoRa_log_{timestamp}.log"
-logging.basicConfig(filename= log_filename, 
-                        level=logging.INFO,
-                        format='%(asctime)s - %(levelname)s - %(message)s',
-                        filemode='w')  
-logging.info("Start")
+
 
 ser = serial.Serial(serial_port, baud_rate, timeout=1)
 
@@ -75,7 +72,7 @@ try:
         if check_pre_arm(master):            
             home_lat, home_lon, home_alt = get_location(master)
             logging.info("Home Position: %f, %f, %f" % (home_lat, home_lon, home_alt))
-            
+            ALT_Above_SEALEAVE = altitude + home_alt
             arm_count = 0
             max_retries = 5 
             arm_drone(master)       
@@ -99,6 +96,7 @@ try:
 	      
       
         takeoff(master, altitude)
+
         if is_armed(master):      
             send_command(ser, GC_Address, "INFO.Drone Ready!")  
             print("System armed")
@@ -108,12 +106,12 @@ try:
             sys.exit()
             
                 
-
-        while True:          
-            drone_command = send_drone_flypath_menu(ser,GC_Address)
-            while not is_number_int(drone_command):
-                drone_command = send_drone_flypath_menu(ser,GC_Address)    
-            match int(drone_command):
+        try:
+            while True:          
+                drone_command = send_drone_flypath_menu(ser,GC_Address)
+                while not is_number_int(drone_command):
+                    drone_command = send_drone_flypath_menu(ser,GC_Address)    
+                match int(drone_command):
                     case 1: #fly foward in meters 
                         logging.info("Fly Foward")
                         current_distance = 0
@@ -132,22 +130,26 @@ try:
                                 logging.info("Current Position: %f, %f, %f" % (Current_lat, Current_lon, Current_alt))
                         send_command(ser, GC_Address, "ACK.Has reach to the target distance")
                     case 2: #fly to a waypoint
-                        logging.info("Fly to a Waypoint")
-                        send_command(ser, GC_Address, "INPUT.Enter Latitude:  ")
-                        waypoint_lat = read_command(ser)                        
-                        while not is_number_float(waypoint_lat):       
+                        try:
+                            logging.info("Fly to a Waypoint")
                             send_command(ser, GC_Address, "INPUT.Enter Latitude:  ")
-                            waypoint_lat = read_command(ser)
-                        waypoint_lat = float(waypoint_lat)
+                            waypoint_lat = read_command(ser)                        
+                            while not is_number_float(waypoint_lat):       
+                                send_command(ser, GC_Address, "INPUT.Enter Latitude:  ")
+                                waypoint_lat = read_command(ser)
+                            waypoint_lat = float(waypoint_lat)
 
-                        send_command(ser, GC_Address, "INPUT.Enter Longitude:  ")
-                        waypoint_lon = read_command(ser)
-                        while not is_number_float(waypoint_lon):       
                             send_command(ser, GC_Address, "INPUT.Enter Longitude:  ")
                             waypoint_lon = read_command(ser)
-                        waypoint_lon = float(waypoint_lon)
+                            while not is_number_float(waypoint_lon):       
+                                send_command(ser, GC_Address, "INPUT.Enter Longitude:  ")
+                                waypoint_lon = read_command(ser)
+                            waypoint_lon = float(waypoint_lon)
 
-                        fly_to_waypoint(master, waypoint_lat, waypoint_lon, altitude )
+                            fly_to_waypoint(master, waypoint_lat, waypoint_lon, altitude )
+                        except Exception as e:
+                            logging.error("Fly to a Waypoint ERROR: %s", str(e), exc_info=True)
+                            send_command(ser, GC_Address, "INFO.Fly to a Waypoint ERROR")
                     case 3: #Hover 
                         logging.info("Hover")
                         send_command(ser, GC_Address, "INPUT.Enter atitude:  ")
@@ -156,7 +158,7 @@ try:
                             send_command(ser, GC_Address, "INPUT.Enter atitude:  ")
                             ALT = read_command(ser)
                         ALT = float(ALT)
-                        fly_hover(master, ALT )
+                        increse_alt(master, ALT )
                     case 4: #return home
                         logging.info("Return Home")
                         fly_to_waypoint(master, home_lat, home_lon, altitude )
@@ -170,10 +172,14 @@ try:
                         Radius = float(Radius)
                         fly_circle(master, Radius,altitude, 0) #clockwise
                     case 6: #return home and land
-                        logging.info("Return Home and Land")
-                        fly_to_waypoint(master, home_lat, home_lon, altitude )
-                        time.sleep(5)
-                        land(master)
+                        try:
+                            logging.info("Return Home and Land")
+                            fly_to_waypoint(master, home_lat, home_lon, altitude )
+                            time.sleep(5)
+                            land(master)
+                        except Exception as e:
+                            logging.error("Return Home ERROR: %s", str(e), exc_info=True)
+                            send_command(ser, GC_Address, "INFO.Return Home ERROR")
                     case 7: #land and break
                         logging.info("Land")
                         land(master)
@@ -186,31 +192,44 @@ try:
                             send_command(ser, GC_Address, "INPUT.Enter Altitude:  ")
                             altitude = read_command(ser)
                         altitude = float(altitude)  
+                        ALT_Above_SEALEAVE = altitude + home_alt
                     case 9:
-                        logging.info("Testing Commication Range")
-                        send_command(ser, GC_Address, "INPUT.Enter Distance Range:  ")
-                        Target_distance = read_command(ser)
-                        while not is_number_float(Target_distance):
+                        try:
+                            logging.info("Testing Commication Range")
                             send_command(ser, GC_Address, "INPUT.Enter Distance Range:  ")
                             Target_distance = read_command(ser)
-                        Target_distance = float(Target_distance)  
+                            while not is_number_float(Target_distance):
+                                send_command(ser, GC_Address, "INPUT.Enter Distance Range:  ")
+                                Target_distance = read_command(ser)
+                            Target_distance = float(Target_distance)  
                         
-                        pass_test = test_lora_comm_range(master, ser, GC_Address, Target_distance,altitude,home_lat, home_lon)                        
-                        if (pass_test == False):
-                            logging.info("LoRa Range has max out")
-                            fly_to_waypoint(master, home_lat, home_lon, altitude )
+                            pass_test = test_lora_comm_range(master, ser, GC_Address, Target_distance,altitude,home_lat, home_lon)                        
+                            if (pass_test == False):
+                                logging.info("LoRa Range has max out")
+                                fly_to_waypoint(master, home_lat, home_lon, altitude )
+                                land(master)
+                                break
+                        except Exception as e:
+                            logging.error("TEST Commication RANGE ERROR: %s", str(e), exc_info=True)
+                            send_command(ser, GC_Address, "INFO.TEST Commication RANGE ERROR")
                             land(master)
-                            break
+                            disarm_drone(master)
+                            
                         
                     case _: #error input
                         send_command(ser, GC_Address,"INFO.Invalid input")        
-        disarm_drone(master)
-        send_command(ser, ADDRESS, "INFO.Drone is disarmed!")  
-	
+            disarm_drone(master)
+            send_command(ser, GC_Address, "INFO.Drone is disarmed!")  
+        except Exception as e:
+            logging.error("Drone Menu ERROR: %s", str(e), exc_info=True)
+            send_command(ser, GC_Address, "INFO.Drone Menu ERROR")
 
 except KeyboardInterrupt:
-    print("Can't connect")
+    logging.info("Can't Connect")
+    send_command(ser, GC_Address, "INFO.Can't Connect")
+finally:
+    logging.info("Script Finish")
+    ser.close()
+    logging.shutdown() 
     sys.exit()
-logging.info("Script Finish")
-ser.close()
 

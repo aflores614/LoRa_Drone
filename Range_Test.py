@@ -14,8 +14,8 @@ from datetime import datetime
 check_interval = 0.5
 
 def rx_test(ser):
-    end_time = time.time() + 2
-    while time.time() < end_time: #5 seconds wait time
+    end_time = time.time() + 10
+    while time.time() < end_time: #10 seconds wait time
         string = ser.readline()
         c = string.decode("utf-8")
         if(c != ""):
