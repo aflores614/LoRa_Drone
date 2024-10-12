@@ -65,17 +65,24 @@ def fly_to_waypoint(master, lat, lon, ALT, ALT_Above_Sealevel):
             lat_error = abs(abs(lat) - abs(current_lat))
             lon_error = abs(abs(lon) - abs(current_lon))        
             alt_error = abs(ALT_Above_Sealevel - current_alt)
-            send_command(ser, GC_Address, "INFO."+ str(current_alt - ALT_Above_Sealevel))          
+            Current_ALTITUDE = abs(current_alt - abs(ALT_Above_Sealevel-ALT))
             
-            if(alt_error < alt_tolerance ):        
-                if(lat_error < tolerance and lon_error < tolerance ):
-                    logging.info("Reach Target Position")
-                    break
-                else:
-                    logging.info("Enroute to target Position")
-                    send_command(ser, GC_Address, "INFO.Enroute to target Position")
+            if(alt_error > alt_tolerance):
+                msg = "INFO.Current ALTITIUDE = "+  str(Current_ALTITUDE) 
+                msg2= "INFO.Need to be at " + str(ALT)
+                send_command(ser, GC_Address,"INFO.Not at Traget ALTITUDE")
+                send_command(ser, GC_Address,msg)
+                send_command(ser, GC_Address,msg2)
+                logging.info("Current ALTITUDE = %f need to be at %f" % (Current_ALTITUDE, ALT))
+            
+                    
+            if(lat_error < tolerance and lon_error < tolerance ):
+                logging.info("Reach Target Position")               
+                break
             else:
-                increse_alt(master, ALT)
+                logging.info("Enroute to target Position")
+                send_command(ser, GC_Address, "INFO.Enroute to target Position")
+           
             time.sleep(1)
     except Exception as e:
         logging.error("Fly to Waypoint Function ERROR: %s", str(e), exc_info=True)
