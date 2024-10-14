@@ -72,17 +72,19 @@ try:
         if check_pre_arm(master):            
             home_lat, home_lon, home_alt = get_location(master)
             logging.info("Home Position: %f, %f, %f" % (home_lat, home_lon, home_alt))
-            ALT_Above_Sealevel = altitude + home_alt
+            send_command(ser, GC_Address, "INFO.Home Position Lock")
+
             arm_count = 0
             max_retries = 5 
-            arm_drone(master)       
+            arm_drone(master)  
+            time.sleep(2)     
+
             while not is_armed(master):
               arm_count += 1
-              send_command(ser, GC_Address, "INFO.Drone is not armed retrying...")
-              logging.info("Drone not arm retrying")
-              time.sleep(5)
+              send_command(ser, GC_Address, "INFO.Drone is not armed retrying")
+              logging.info("Drone not arm retrying")              
               arm_drone(master) #Retry to arm the drone
-                
+              time.sleep(3)  
               if arm_count == max_retries:
                   send_command(ser, GC_Address, "INFO.ARM Fail Power OFF")
                   logging.info("ARM Fail")
@@ -104,7 +106,8 @@ try:
             print("system fail")
             send_command(ser, GC_Address, "INFO.ARM Fail, Power OFF")
             sys.exit()
-            
+
+           
                 
         try:
             while True:          
@@ -146,7 +149,7 @@ try:
                                 waypoint_lon = read_command(ser)
                             waypoint_lon = float(waypoint_lon)
 
-                            fly_to_waypoint(master, waypoint_lat, waypoint_lon, altitude, ALT_Above_Sealevel )
+                            fly_to_waypoint(master, waypoint_lat, waypoint_lon, altitude )
                         except Exception as e:
                             logging.error("Fly to a Waypoint ERROR: %s", str(e), exc_info=True)
                             send_command(ser, GC_Address, "INFO.Fly to a Waypoint ERROR")
@@ -161,7 +164,7 @@ try:
                         increse_alt(master, ALT )
                     case 4: #return home
                         logging.info("Return Home")
-                        fly_to_waypoint(master, home_lat, home_lon, altitude,ALT_Above_Sealevel )
+                        fly_to_waypoint(master, home_lat, home_lon, altitude )
                     case 5: #circle mode
                         logging.info("Circle Mode")
                         send_command(ser, GC_Address, "INPUT.Enter Radius:  ")
@@ -170,11 +173,11 @@ try:
                             send_command(ser, GC_Address, "INPUT.Enter Radius:  ")
                             Radius = read_command(ser)
                         Radius = float(Radius)
-                        fly_circle(master, Radius,altitude, 0,ALT_Above_Sealevel) #clockwise
+                        fly_circle(master, Radius,altitude, 0) #clockwise
                     case 6: #return home and land
                         try:
                             logging.info("Return Home and Land")
-                            fly_to_waypoint(master, home_lat, home_lon, altitude,ALT_Above_Sealevel )
+                            fly_to_waypoint(master, home_lat, home_lon, altitude )
                             time.sleep(5)
                             land(master)
                         except Exception as e:
@@ -192,7 +195,7 @@ try:
                             send_command(ser, GC_Address, "INPUT.Enter Altitude:  ")
                             altitude = read_command(ser)
                         altitude = float(altitude)  
-                        ALT_Above_Sealevel = altitude + home_alt
+                        
                     case 9:
                         try:
                             logging.info("Testing Commication Range")
@@ -203,10 +206,10 @@ try:
                                 Target_distance = read_command(ser)
                             Target_distance = float(Target_distance)  
                         
-                            pass_test = test_lora_comm_range(master, ser, GC_Address, Target_distance,altitude,home_lat, home_lon,ALT_Above_Sealevel)                        
+                            pass_test = test_lora_comm_range(master, ser, GC_Address, Target_distance,altitude,home_lat, home_lon)                        
                             if (pass_test == False):
                                 logging.info("LoRa Range has max out")
-                                fly_to_waypoint(master, home_lat, home_lon, altitude,ALT_Above_Sealevel )
+                                fly_to_waypoint(master, home_lat, home_lon, altitude )
                                 land(master)
                                 break
                         except Exception as e:

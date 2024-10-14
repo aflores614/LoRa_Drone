@@ -47,7 +47,7 @@ def fly_movment(master, Travel_distance, Target_distance, Home_lat, Home_lon):
     
 
     
-def fly_to_waypoint(master, lat, lon, ALT, ALT_Above_Sealevel):
+def fly_to_waypoint(master, lat, lon, ALT):
     master.mav.send(mavutil.mavlink.MAVLink_set_position_target_global_int_message(10, master.target_system,  
                                                                                  master.target_component, 
                                                                                  mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT_INT,
@@ -58,34 +58,25 @@ def fly_to_waypoint(master, lat, lon, ALT, ALT_Above_Sealevel):
                                                                                  0, 0 
                                                                                 ))
     tolerance=0.00001 # how close the drone needs to get to the target position before the loop breaks
-    alt_tolerance = 1
-    try:
-        while True:     
+  
+
+    while True:     
             current_lat, current_lon, current_alt = get_location(master)
             lat_error = abs(abs(lat) - abs(current_lat))
-            lon_error = abs(abs(lon) - abs(current_lon))        
-            alt_error = abs(ALT_Above_Sealevel - current_alt)
-            Current_ALTITUDE = abs(current_alt - abs(ALT_Above_Sealevel-ALT))
-            
-            if(alt_error > alt_tolerance):
-                msg = "INFO.Current ALTITIUDE = "+  str(Current_ALTITUDE) 
-                msg2= "INFO.Need to be at " + str(ALT)
-                send_command(ser, GC_Address,"INFO.Not at Traget ALTITUDE")
-                send_command(ser, GC_Address,msg)
-                send_command(ser, GC_Address,msg2)
-                logging.info("Current ALTITUDE = %f need to be at %f" % (Current_ALTITUDE, ALT))
+            lon_error = abs(abs(lon) - abs(current_lon))                 
             
                     
             if(lat_error < tolerance and lon_error < tolerance ):
-                logging.info("Reach Target Position")               
+                logging.info("Reach Target Position")    
+                send_command(ser, GC_Address, "INFO.Reach Position")           
                 break
             else:
                 logging.info("Enroute to target Position")
                 send_command(ser, GC_Address, "INFO.Enroute to target Position")
            
             time.sleep(1)
-    except Exception as e:
-        logging.error("Fly to Waypoint Function ERROR: %s", str(e), exc_info=True)
+
+
         
 
 def increse_alt(master, alt):   
@@ -117,7 +108,7 @@ def increse_alt(master, alt):
                 print("Timeout reached. Unable to reach target altitude.")
                 return   
         time.sleep(1)
-def fly_circle(master,radius,altitude,dir,ALT_Above_Sealevel):
+def fly_circle(master,radius,altitude,dir):
     
     num_waypoint = 8
     waypoints_lat = []
@@ -135,7 +126,7 @@ def fly_circle(master,radius,altitude,dir,ALT_Above_Sealevel):
         for i in range(num_waypoint): #clock-wise fly path
             lat =  waypoints_lat[i]
             lon =  waypoints_lon[i]
-            fly_to_waypoint(master, lat, lon, altitude,ALT_Above_Sealevel )
+            fly_to_waypoint(master, lat, lon, altitude )
             logging.info("Point %f complete " % (i+1))
             message = "ACK.Circle Waypoint " + str(i+1) + "/" + str(num_waypoint) 
             send_command(ser, GC_Address, message)
@@ -143,7 +134,7 @@ def fly_circle(master,radius,altitude,dir,ALT_Above_Sealevel):
         for i in range(num_waypoint): #counterclock-wise fly path
             lat =  waypoints_lat[num_waypoint - i - 1]
             lon =  waypoints_lon[num_waypoint - i - 1]
-            fly_to_waypoint(master, lat, lon, altitude,ALT_Above_Sealevel )
+            fly_to_waypoint(master, lat, lon, altitude )
             logging.info("Point %f complete " % (i+1))
             message = "ACK.Circle Waypoint " + str(i+1) + "/" + str(num_waypoint) 
             send_command(ser, GC_Address, message)

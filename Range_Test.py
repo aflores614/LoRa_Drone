@@ -38,7 +38,7 @@ def tx_test(ser, GC_Address):
     print(rx)
     return rx
 
-def test_lora_comm_range(master, ser, GC_Address, Target_distance, altitude, home_lat, home_lon,ALT_Above_Sealevel):  
+def test_lora_comm_range(master, ser, GC_Address, Target_distance, altitude, home_lat, home_lon):  
     distance = 0  
     i = 0
     num_waypoint = 10 
@@ -65,7 +65,7 @@ def test_lora_comm_range(master, ser, GC_Address, Target_distance, altitude, hom
             if i < num_waypoint:
                 lat =  waypoints_lat[i]
                 lon =  waypoints_lon[i]            
-                fly_to_waypoint(master, lat, lon, altitude, ALT_Above_Sealevel)            
+                fly_to_waypoint(master, lat, lon, altitude)            
                 logging.info("Point %f complete " % (i+1))
                 message = "ACK.Waypoint " + str(i+1) + "/" + str(num_waypoint) 
                 send_command(ser, GC_Address, message)            
@@ -84,7 +84,7 @@ def test_lora_comm_range(master, ser, GC_Address, Target_distance, altitude, hom
         distance += intervals
 
     send_command(ser, GC_Address, "ACK.Flying back Home")   
-    fly_to_waypoint(master, home_lat, home_lon, altitude, ALT_Above_Sealevel )
+    fly_to_waypoint(master, home_lat, home_lon, altitude )
 
     logging.info("Test Past of %f meters" % distance)
     return True
@@ -105,12 +105,10 @@ if __name__ == "__main__":
     alt = 5
     master = connect_to_vehicle()
     send_command(ser, 2, "INFO.Test")
-    home_lat, home_lon, home_alt = get_location(master)
-    ALT_Above_SEALEAVE = home_alt + alt
+    home_lat, home_lon, home_alt = get_location(master) 
     print(home_lat, home_lon, home_alt)
-    send_command(ser, 2, "INFO.Home Altitude = "+ str(home_alt))
     try:
-        test = test_lora_comm_range(master, ser, 2, 300, alt, home_lat, home_lon,ALT_Above_SEALEAVE)
+        test = test_lora_comm_range(master, ser, 2, 300, alt, home_lat, home_lon)
     except Exception as e:
         send_command(ser, 2, "INFO.ERROR")
         print("ERROR")
