@@ -33,7 +33,7 @@ def rx_test(ser):
     return False
 
 def tx_test(ser, GC_Address):
-    send_command(ser, GC_Address, "TEST.LoRa_CT ")
+    send_command(ser, GC_Address, "TEST:LoRa_CT ")
     rx = rx_test(ser)
     print(rx)
     return rx

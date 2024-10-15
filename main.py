@@ -28,6 +28,7 @@ altitude = 1.5 #defalut altitude
 
 
 
+
 ser = serial.Serial(serial_port, baud_rate, timeout=1)
 
 try:
@@ -71,49 +72,16 @@ try:
                 send_command(ser, GC_Address, "INFO:Invalid input")  
         if check_pre_arm(master):            
             home_lat, home_lon, home_alt = get_location(master)
-            logging.info("Home Position: %f, %f, %f" % (home_lat, home_lon, home_alt))
-            home_positon_lat  = str(home_lat)
-            home_positon_lon  = str(home_lon)
-        
-            send_command(ser, GC_Address, "INFO:Home Position Lock:")
-            send_command(ser, GC_Address, "INFO:" + home_positon_lat)
-            send_command(ser, GC_Address, "INFO:" + home_positon_lon)
-
-            arm_count = 0
-            max_retries = 5 
-            arm_drone(master)  
-            time.sleep(2)     
-
-            while not is_armed(master):
-              arm_count += 1
-              send_command(ser, GC_Address, "INFO:Drone is not armed retrying")
-              logging.info("Drone not arm retrying")              
-              arm_drone(master) #Retry to arm the drone
-              time.sleep(3)  
-              if arm_count == max_retries:
-                  send_command(ser, GC_Address, "INFO:ARM Fail Power OFF")
-                  logging.info("ARM Fail")
-                         
-    
-        else:
-           sys.exit()     
-            
-        logging.info("Drone is Arm")
-        send_command(ser, GC_Address, "INFO:Drone is armed!")  
-	      
-      
-        takeoff(master, altitude)
-
-        if is_armed(master):      
-            send_command(ser, GC_Address, "INFO:Drone Ready!")  
-            print("System armed")
-        else:
-            print("system fail")
-            send_command(ser, GC_Address, "INFO:ARM Fail, Power OFF")
-            sys.exit()
+            logging.info("Home Position: %f, %f, %f" % (home_lat, home_lon, home_alt))                        
+            arm_drone(master)
+            takeoff(master, altitude)
 
            
-                
+            
+        logging.info("Drone is Arm")
+        send_command(ser, GC_Address, "INFO:Drone is armed!")        
+
+   
         try:
             while True:          
                 drone_command = send_drone_flypath_menu(ser,GC_Address)

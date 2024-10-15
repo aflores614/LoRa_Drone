@@ -34,7 +34,7 @@ def fly_movment(master, Travel_distance, Target_distance, Home_lat, Home_lon):
                                                                                 ))
                                                                                 
     msg = master.recv_match(type='COMMAND_ACK', blocking=True, timeout=5)
-    print(msg)
+    
     if (msg == True and msg.result == mavutil.mavlink.MAV_RESULT_ACCEPTED):
         end_time = time.time() + 1  
         while Travel_distance <= Target_distance or time.time() < end_time:   
