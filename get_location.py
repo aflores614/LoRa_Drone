@@ -32,9 +32,9 @@ def get_location(master):
             lon = msg.lon/1e7
             alt = msg.alt/1e3 
             if(lat == 0.0 or lon == 0.0 or alt == 0.0):
-                    logging.info("INFO.GPS Bad Health EMERGENCY Landing")
-                    send_command(ser, GC_Address, "INFO.GPS Bad Health")
-                    send_command(ser, GC_Address, "INFO.EMERGENCY Landing")
+                    logging.info("INFO:GPS Bad Health EMERGENCY Landing")
+                    send_command(ser, GC_Address, "INFO:GPS Bad Health")
+                    send_command(ser, GC_Address, "INFO:EMERGENCY Landing")
                     land(master)                
                 
             else:
@@ -42,12 +42,12 @@ def get_location(master):
             
         elif(num_try < max_try):
             logging.info("INFO.WAITING FOR GPS")
-            send_command(ser, GC_Address, "INFO.Waiting For Location" )
+            send_command(ser, GC_Address, "INFO:Waiting For Location" )
             num_try += 1
         else:
-            logging.info("INFO.GPS NOT Responding EMERGENCY Landing")
-            send_command(ser, GC_Address, "INFO.GPS NOT Responding")           
-            send_command(ser, GC_Address, "INFO.EMERGENCY Landing")
+            logging.info("INFO:GPS NOT Responding EMERGENCY Landing")
+            send_command(ser, GC_Address, "INFO:GPS NOT Responding")           
+            send_command(ser, GC_Address, "INFO:EMERGENCY Landing")
 
 
             

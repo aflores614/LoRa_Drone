@@ -24,7 +24,7 @@ setup_log_file()
 serial_port = '/dev/ttyUSB0'
 baud_rate = 115200  # Default baud rate for RYLR998
 GC_Address = 2
-altitude = 5 #defalut altitude
+altitude = 1.5 #defalut altitude
 
 
 
@@ -38,7 +38,7 @@ try:
     print("The network is:", network)
     
     while True:  # Establish communication between Drone and Ground Control
-        send_command(ser, GC_Address, "INPUT.Connection y/n")
+        send_command(ser, GC_Address, "INPUT:Connection y/n")
         response = read_command(ser)
         logging.info("Connect to Drone?")
         print(response)
@@ -50,15 +50,15 @@ try:
             logging.info("No System OFF")
             sys.exit()
         else:
-            send_command(ser, GC_Address, "ERROR.Invalid input")
+            send_command(ser, GC_Address, "ERROR:Invalid input")
     
     master = connect_to_vehicle()
     
     if master:
-        send_command(ser, GC_Address, "INFO.Vehicle Connected")
+        send_command(ser, GC_Address, "INFO:Vehicle Connected")
 
         while True: #ask to arm the drone
-            send_command(ser, GC_Address, "INPUT.Arm Drone y/n: ")
+            send_command(ser, GC_Address, "INPUT:Arm Drone y/n: ")
             arm_response = read_command(ser)
             logging.info("Arm Drone?")
             if arm_response == 'y':
@@ -68,11 +68,16 @@ try:
                 logging.info("No System OFF")
                 sys.exit()
             else:
-                send_command(ser, GC_Address, "INFO.Invalid input")  
+                send_command(ser, GC_Address, "INFO:Invalid input")  
         if check_pre_arm(master):            
             home_lat, home_lon, home_alt = get_location(master)
             logging.info("Home Position: %f, %f, %f" % (home_lat, home_lon, home_alt))
-            send_command(ser, GC_Address, "INFO.Home Position Lock")
+            home_positon_lat  = str(home_lat)
+            home_positon_lon  = str(home_lon)
+        
+            send_command(ser, GC_Address, "INFO:Home Position Lock:")
+            send_command(ser, GC_Address, "INFO:" + home_positon_lat)
+            send_command(ser, GC_Address, "INFO:" + home_positon_lon)
 
             arm_count = 0
             max_retries = 5 
@@ -81,12 +86,12 @@ try:
 
             while not is_armed(master):
               arm_count += 1
-              send_command(ser, GC_Address, "INFO.Drone is not armed retrying")
+              send_command(ser, GC_Address, "INFO:Drone is not armed retrying")
               logging.info("Drone not arm retrying")              
               arm_drone(master) #Retry to arm the drone
               time.sleep(3)  
               if arm_count == max_retries:
-                  send_command(ser, GC_Address, "INFO.ARM Fail Power OFF")
+                  send_command(ser, GC_Address, "INFO:ARM Fail Power OFF")
                   logging.info("ARM Fail")
                          
     
@@ -94,17 +99,17 @@ try:
            sys.exit()     
             
         logging.info("Drone is Arm")
-        send_command(ser, GC_Address, "INFO.Drone is armed!")  
+        send_command(ser, GC_Address, "INFO:Drone is armed!")  
 	      
       
         takeoff(master, altitude)
 
         if is_armed(master):      
-            send_command(ser, GC_Address, "INFO.Drone Ready!")  
+            send_command(ser, GC_Address, "INFO:Drone Ready!")  
             print("System armed")
         else:
             print("system fail")
-            send_command(ser, GC_Address, "INFO.ARM Fail, Power OFF")
+            send_command(ser, GC_Address, "INFO:ARM Fail, Power OFF")
             sys.exit()
 
            
@@ -119,10 +124,10 @@ try:
                         logging.info("Fly Foward")
                         current_distance = 0
                         start_lat, start_lon, start_alt = get_location(master)
-                        send_command(ser, GC_Address, "INPUT.Enter Distance to Fly Forward")
+                        send_command(ser, GC_Address, "INPUT:Enter Distance to Fly Forward")
                         distance = read_command(ser)
                         while not is_number_float(distance):
-                            send_command(ser, GC_Address, "INPUT.Enter valid Distance value")
+                            send_command(ser, GC_Address, "INPUT:Enter valid Distance value")
                             distance = read_command(ser)  
                         distance = float(distance)                    
                         while current_distance < distance: 
@@ -131,34 +136,34 @@ try:
                                 Current_lat, Current_lon, Current_alt = get_location(master)
                                 current_distance = distance_travel(home_lat, Current_lat, home_lon, Current_lon)
                                 logging.info("Current Position: %f, %f, %f" % (Current_lat, Current_lon, Current_alt))
-                        send_command(ser, GC_Address, "ACK.Has reach to the target distance")
+                        send_command(ser, GC_Address, "ACK:Has reach to the target distance")
                     case 2: #fly to a waypoint
                         try:
                             logging.info("Fly to a Waypoint")
-                            send_command(ser, GC_Address, "INPUT.Enter Latitude:  ")
+                            send_command(ser, GC_Address, "INPUT:Enter Latitude:  ")
                             waypoint_lat = read_command(ser)                        
                             while not is_number_float(waypoint_lat):       
-                                send_command(ser, GC_Address, "INPUT.Enter Latitude:  ")
+                                send_command(ser, GC_Address, "INPUT:Enter Latitude:  ")
                                 waypoint_lat = read_command(ser)
                             waypoint_lat = float(waypoint_lat)
 
-                            send_command(ser, GC_Address, "INPUT.Enter Longitude:  ")
+                            send_command(ser, GC_Address, "INPUT:Enter Longitude:  ")
                             waypoint_lon = read_command(ser)
                             while not is_number_float(waypoint_lon):       
-                                send_command(ser, GC_Address, "INPUT.Enter Longitude:  ")
+                                send_command(ser, GC_Address, "INPUT:Enter Longitude:  ")
                                 waypoint_lon = read_command(ser)
                             waypoint_lon = float(waypoint_lon)
 
                             fly_to_waypoint(master, waypoint_lat, waypoint_lon, altitude )
                         except Exception as e:
                             logging.error("Fly to a Waypoint ERROR: %s", str(e), exc_info=True)
-                            send_command(ser, GC_Address, "INFO.Fly to a Waypoint ERROR")
+                            send_command(ser, GC_Address, "INFO:Fly to a Waypoint ERROR")
                     case 3: #Hover 
                         logging.info("Hover")
-                        send_command(ser, GC_Address, "INPUT.Enter atitude:  ")
+                        send_command(ser, GC_Address, "INPUT:Enter atitude:  ")
                         ALT = read_command(ser)
                         while not is_number_float(ALT):
-                            send_command(ser, GC_Address, "INPUT.Enter atitude:  ")
+                            send_command(ser, GC_Address, "INPUT:Enter atitude:  ")
                             ALT = read_command(ser)
                         ALT = float(ALT)
                         increse_alt(master, ALT )
@@ -167,10 +172,10 @@ try:
                         fly_to_waypoint(master, home_lat, home_lon, altitude )
                     case 5: #circle mode
                         logging.info("Circle Mode")
-                        send_command(ser, GC_Address, "INPUT.Enter Radius:  ")
+                        send_command(ser, GC_Address, "INPUT:Enter Radius:  ")
                         Radius = read_command(ser)
                         while not is_number_float(Radius):
-                            send_command(ser, GC_Address, "INPUT.Enter Radius:  ")
+                            send_command(ser, GC_Address, "INPUT:Enter Radius:  ")
                             Radius = read_command(ser)
                         Radius = float(Radius)
                         fly_circle(master, Radius,altitude, 0) #clockwise
@@ -182,27 +187,27 @@ try:
                             land(master)
                         except Exception as e:
                             logging.error("Return Home ERROR: %s", str(e), exc_info=True)
-                            send_command(ser, GC_Address, "INFO.Return Home ERROR")
+                            send_command(ser, GC_Address, "INFO:Return Home ERROR")
                     case 7: #land and break
                         logging.info("Land")
                         land(master)
                         break
                     case 8: #change alt value
                         logging.info("Change Altitude Value")
-                        send_command(ser, GC_Address, "INPUT.Enter New Altitude Value:  ")
+                        send_command(ser, GC_Address, "INPUT:Enter New Altitude Value:  ")
                         altitude = read_command(ser)
                         while not is_number_float(altitude):
-                            send_command(ser, GC_Address, "INPUT.Enter Altitude:  ")
+                            send_command(ser, GC_Address, "INPUT:Enter Altitude:  ")
                             altitude = read_command(ser)
                         altitude = float(altitude)  
                         
                     case 9:
                         try:
                             logging.info("Testing Commication Range")
-                            send_command(ser, GC_Address, "INPUT.Enter Distance Range:  ")
+                            send_command(ser, GC_Address, "INPUT:Enter Distance Range:  ")
                             Target_distance = read_command(ser)
                             while not is_number_float(Target_distance):
-                                send_command(ser, GC_Address, "INPUT.Enter Distance Range:  ")
+                                send_command(ser, GC_Address, "INPUT:Enter Distance Range:  ")
                                 Target_distance = read_command(ser)
                             Target_distance = float(Target_distance)  
                         
@@ -214,25 +219,25 @@ try:
                                 break
                         except Exception as e:
                             logging.error("TEST Commication RANGE ERROR: %s", str(e), exc_info=True)
-                            send_command(ser, GC_Address, "INFO.TEST Commication RANGE ERROR")
+                            send_command(ser, GC_Address, "INFO:TEST Commication RANGE ERROR")
                             land(master)
                             disarm_drone(master)
                             
                         
                     case _: #error input
-                        send_command(ser, GC_Address,"INFO.Invalid input")        
+                        send_command(ser, GC_Address,"INFO:Invalid input")        
             disarm_drone(master)
-            send_command(ser, GC_Address, "INFO.Drone is disarmed!")  
+            send_command(ser, GC_Address, "INFO:Drone is disarmed!")  
         except Exception as e:
             logging.error("Drone Menu ERROR: %s", str(e), exc_info=True)
-            send_command(ser, GC_Address, "INFO.Drone Menu ERROR")
+            send_command(ser, GC_Address, "INFO:Drone Menu ERROR")
 
 except KeyboardInterrupt:
     logging.info("User On Rasberry pi Cancel")
-    send_command(ser, GC_Address, "INFO.User On Rasberry pi Cancel")
+    send_command(ser, GC_Address, "INFO:User On Rasberry pi Cancel")
 finally:
     logging.info("Script Finish")
-    send_command(ser, GC_Address, "INFO.FInish")
+    send_command(ser, GC_Address, "INFO:FInish")
     ser.close()
     logging.shutdown() 
     sys.exit()

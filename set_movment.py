@@ -36,8 +36,7 @@ def fly_movment(master, Travel_distance, Target_distance, Home_lat, Home_lon):
     msg = master.recv_match(type='COMMAND_ACK', blocking=True, timeout=5)
     print(msg)
     if (msg == True and msg.result == mavutil.mavlink.MAV_RESULT_ACCEPTED):
-        end_time = time.time() + 1
-        #sending velocity commands, they should be re-sent every second   
+        end_time = time.time() + 1  
         while Travel_distance <= Target_distance or time.time() < end_time:   
             Current_lat, Current_lon, Current_alt = get_location(master) 
             Travel_distance = distance_travel(Home_lat, Current_lat, Home_lon, Current_lon)
@@ -60,19 +59,23 @@ def fly_to_waypoint(master, lat, lon, ALT):
     tolerance=0.00001 # how close the drone needs to get to the target position before the loop breaks
   
 
-    while True:     
-            current_lat, current_lon, current_alt = get_location(master)
+    while True:
+            try: 
+                current_lat, current_lon, current_alt = get_location(master)
+            except Exception as e:
+                logging.info("Error trying to current location in fly_to_waypoint function")
+                send_command(ser, GC_Address,"INFO:GET_LOCATION in fly point fail")
+                print("ERROR TRYING TO GET CURRENT LOCATION")
             lat_error = abs(abs(lat) - abs(current_lat))
-            lon_error = abs(abs(lon) - abs(current_lon))                 
-            
-                    
+            lon_error = abs(abs(lon) - abs(current_lon))              
+
             if(lat_error < tolerance and lon_error < tolerance ):
                 logging.info("Reach Target Position")    
-                send_command(ser, GC_Address, "INFO.Reach Position")           
+                
                 break
             else:
                 logging.info("Enroute to target Position")
-                send_command(ser, GC_Address, "INFO.Enroute to target Position")
+
            
             time.sleep(1)
 
@@ -120,7 +123,7 @@ def fly_circle(master,radius,altitude,dir):
         waypoints_lon.append(lon)
         angle = angle + (360/num_waypoint)
         logging.info("Circle Waypoints : %f, %f" % (lat, lon))
-        message = "INFO.Calcuate CIRCLE Waypoint " + str(i+1) + "/" + str(num_waypoint)
+        message = "INFO:Calcuate CIRCLE Waypoint " + str(i+1) + "/" + str(num_waypoint)
         send_command (ser, GC_Address, message) 
     if(dir == 0):
         for i in range(num_waypoint): #clock-wise fly path
@@ -128,7 +131,7 @@ def fly_circle(master,radius,altitude,dir):
             lon =  waypoints_lon[i]
             fly_to_waypoint(master, lat, lon, altitude )
             logging.info("Point %f complete " % (i+1))
-            message = "ACK.Circle Waypoint " + str(i+1) + "/" + str(num_waypoint) 
+            message = "ACK:Circle Waypoint " + str(i+1) + "/" + str(num_waypoint) 
             send_command(ser, GC_Address, message)
     else:
         for i in range(num_waypoint): #counterclock-wise fly path
@@ -136,7 +139,7 @@ def fly_circle(master,radius,altitude,dir):
             lon =  waypoints_lon[num_waypoint - i - 1]
             fly_to_waypoint(master, lat, lon, altitude )
             logging.info("Point %f complete " % (i+1))
-            message = "ACK.Circle Waypoint " + str(i+1) + "/" + str(num_waypoint) 
+            message = "ACK:Circle Waypoint " + str(i+1) + "/" + str(num_waypoint) 
             send_command(ser, GC_Address, message)
 
 
