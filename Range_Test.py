@@ -41,7 +41,7 @@ def tx_test(ser, GC_Address):
 def test_lora_comm_range(master, ser, GC_Address, Target_distance, altitude, home_lat, home_lon):  
     distance = 0  
     i = 0
-    num_waypoint = 4 
+    num_waypoint = 5 
     waypoints_lat = []
     waypoints_lon = []
     angle = 0

@@ -13,7 +13,7 @@ serial_port = '/dev/ttyUSB0'
 baud_rate = 115200  # Default baud rate for RYLR998
 GC_Address = 2
 ser = serial.Serial(serial_port, baud_rate, timeout=1)
-check_interval = 0.5
+check_interval = 0.1
 
 
 
@@ -77,7 +77,7 @@ def fly_to_waypoint(master, lat, lon, ALT):
                 logging.info("Enroute to target Position")
 
            
-            time.sleep(1)
+            time.sleep(check_interval)
 
 
         
