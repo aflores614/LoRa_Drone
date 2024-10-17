@@ -6,7 +6,7 @@ import logging
 from connect_to_vehicle import connect_to_vehicle
 from arm_drone import arm_drone, is_armed
 from disarm_drone import disarm_drone
-from lora import send_command, get_address, get_network, read_command
+from lora import send_command, get_address, get_network, read_command,set_parameter
 from takeoff import takeoff
 from set_movment import fly_movment, fly_to_waypoint, increse_alt,fly_circle
 from get_location import get_location
@@ -37,6 +37,9 @@ try:
     
     network = get_network(ser)
     print("The network is:", network)
+    
+    set_parameter(ser,8,7,1,12)
+ 
     
     while True:  # Establish communication between Drone and Ground Control
         send_command(ser, GC_Address, "INPUT:Connection y/n")
