@@ -58,7 +58,7 @@ def fly_to_waypoint(master, lat, lon, ALT):
                                                                                 ))
     tolerance=0.00001 # how close the drone needs to get to the target position before the loop breaks
     start_time = time.time()  # Start time to track timeout duration
-    timeout = 10 
+    timeout = 60 
 
     while True:
             try: 
@@ -69,7 +69,7 @@ def fly_to_waypoint(master, lat, lon, ALT):
                 print("ERROR TRYING TO GET CURRENT LOCATION")
             lat_error = abs(abs(lat) - abs(current_lat))
             lon_error = abs(abs(lon) - abs(current_lon))              
-            if time.time() - start_time > timeout:
+            if time.time() - start_time < timeout:
                 if(lat_error < tolerance and lon_error < tolerance ):
                     logging.info("Reach Target Position")    
                     break
@@ -144,6 +144,5 @@ def fly_circle(master,radius,altitude,dir):
             logging.info("Point %f complete " % (i+1))
             message = "ACK:Circle Waypoint " + str(i+1) + "/" + str(num_waypoint) 
             send_command(ser, GC_Address, message)
-
 
         

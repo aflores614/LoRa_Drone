@@ -9,7 +9,7 @@ def send_command(ser, ADDRESS, command):
         command_len = str(len(command))
         c = ('AT+SEND=' + str(ADDRESS) + ',' + command_len + ',' + command + '\r\n')   
         ser.write(('AT+SEND=' + str(ADDRESS) + ',' + command_len + ',' + command + '\r\n').encode())
-        time.sleep(1)  # Wait for the command to be processed
+        time.sleep(0.5)  # Wait for the command to be processed
     except Exception as e:
         logging.info("Error Send command")
 def get_address(ser):
