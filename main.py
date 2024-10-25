@@ -24,7 +24,7 @@ setup_log_file()
 serial_port = '/dev/ttyUSB0'
 baud_rate = 115200  # Default baud rate for RYLR998
 GC_Address = 2
-altitude = 8 #defalut altitude
+altitude = 2 #defalut altitude
 
 
 
@@ -107,7 +107,7 @@ try:
                             break
                         while not is_number_float(y):
                             send_command(ser, GC_Address, "INPUT:Enter valid y Distance value")
-                            x = read_command(ser)  
+                            y = read_command(ser)  
                         y = float(y)         
 
                         fly_movment(master, x, y)                                
