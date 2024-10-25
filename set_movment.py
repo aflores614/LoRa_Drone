@@ -14,10 +14,11 @@ baud_rate = 115200  # Default baud rate for RYLR998
 GC_Address = 2
 ser = serial.Serial(serial_port, baud_rate, timeout=1)
 check_interval = 0.1
+speed = 10 # drone spreed 10 m/s
+error = 0.5
 
 
-
-def fly_movment(master, Travel_distance, Target_distance, Home_lat, Home_lon):
+def fly_movment(master, x, y):
    
     # vx value for foward
     # vy value for right
@@ -27,22 +28,19 @@ def fly_movment(master, Travel_distance, Target_distance, Home_lat, Home_lon):
                                                                                  master.target_component, 
                                                                                  mavutil.mavlink.MAV_FRAME_BODY_OFFSET_NED,
                                                                                  int(0b110111111000 ), 
-                                                                                 Target_distance, 0, 0, 
+                                                                                 x, y, 0, 
                                                                                  0, 0 , 0, 
                                                                                  0, 0, 0, 
                                                                                  0, 0 
                                                                                 ))
                                                                                 
     msg = master.recv_match(type='COMMAND_ACK', blocking=True, timeout=5)
-    
-    if (msg == True and msg.result == mavutil.mavlink.MAV_RESULT_ACCEPTED):
-        end_time = time.time() + 1  
-        while Travel_distance <= Target_distance or time.time() < end_time:   
-            Current_lat, Current_lon, Current_alt = get_location(master) 
-            Travel_distance = distance_travel(Home_lat, Current_lat, Home_lon, Current_lon)
-            print("Current distance travel: ", Travel_distance)
-            logging.info("Distance traveled: %.2f meters" % Travel_distance) 
-            time.sleep(check_interval)            
+    if(x == 0):
+        time.sleep((abs(y) / speed  ) + error )   
+    elif(y == 0):
+        time.sleep( (abs(x) / speed) + error )
+    else:
+        time.sleep(((abs(x) + abs(y)) / speed) + error)
     
 
     
@@ -58,7 +56,7 @@ def fly_to_waypoint(master, lat, lon, ALT):
                                                                                 ))
     tolerance=0.00001 # how close the drone needs to get to the target position before the loop breaks
     start_time = time.time()  # Start time to track timeout duration
-    timeout = 60 
+    timeout = 120 
 
     while True:
             try: 
@@ -71,7 +69,8 @@ def fly_to_waypoint(master, lat, lon, ALT):
             lon_error = abs(abs(lon) - abs(current_lon))              
             if time.time() - start_time < timeout:
                 if(lat_error < tolerance and lon_error < tolerance ):
-                    logging.info("Reach Target Position")    
+                    logging.info("Reach Target Position")
+                    send_command(ser, GC_Address,"INFO:Reach Target Position")     
                     break
                 else:
                     logging.info("Enroute to target Position")

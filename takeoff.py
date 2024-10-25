@@ -15,8 +15,6 @@ def takeoff(master,altitude):
         0,
         0, 0, 0, 0, 0, 0,
         altitude)
-    
-    print(f"Taking off to {altitude} meters")
 
     master.mav.request_data_stream_send(
         master.target_system,
@@ -30,12 +28,9 @@ def takeoff(master,altitude):
         msg = master.recv_match(type='GLOBAL_POSITION_INT', blocking=True)
         if msg:
             relative_altitude = msg.relative_alt/ 1000.0  # Altitude in meters
-            print(f"Current altitude: {relative_altitude}")
             if relative_altitude >= altitude - 0.1:  # Allow a small margin                
-                print(f"Reached target altitude of {altitude} meters")
                 break
             if time.time() - start_time > timeout:
-                print("Timeout reached. Unable to reach target altitude.")
                 return   
         time.sleep(1)
 

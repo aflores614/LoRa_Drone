@@ -77,9 +77,7 @@ try:
             home_lat, home_lon, home_alt = get_location(master)
             logging.info("Home Position: %f, %f, %f" % (home_lat, home_lon, home_alt))                        
             arm_drone(master)
-            takeoff(master, altitude)
-
-           
+            takeoff(master, altitude)           
             
         logging.info("Drone is Arm")
         send_command(ser, GC_Address, "INFO:Drone is armed!")        
@@ -92,27 +90,35 @@ try:
                     drone_command = send_drone_flypath_menu(ser,GC_Address)    
                 match int(drone_command):
                     case 1: #fly foward in meters 
-                        logging.info("Fly Foward")
-                        current_distance = 0
-                        start_lat, start_lon, start_alt = get_location(master)
-                        send_command(ser, GC_Address, "INPUT:Enter Distance to Fly Forward")
-                        distance = read_command(ser)
-                        while not is_number_float(distance):
-                            send_command(ser, GC_Address, "INPUT:Enter valid Distance value")
-                            distance = read_command(ser)  
-                        distance = float(distance)                    
-                        while current_distance < distance: 
-                                                        
-                                fly_movment(master, current_distance, distance, start_lat, start_lon)
-                                Current_lat, Current_lon, Current_alt = get_location(master)
-                                current_distance = distance_travel(home_lat, Current_lat, home_lon, Current_lon)
-                                logging.info("Current Position: %f, %f, %f" % (Current_lat, Current_lon, Current_alt))
+                        logging.info("Fly Movement")
+
+                        send_command(ser, GC_Address, "INPUT:Enter X axis distance")
+                        x = read_command(ser)
+                        if (x == "cancel"):
+                            break
+                        while not is_number_float(x):
+                            send_command(ser, GC_Address, "INPUT:Enter valid  x Distance value")
+                            x = read_command(ser)  
+                        x = float(x)         
+
+                        send_command(ser, GC_Address, "INPUT:Enter y axis distance")
+                        y = read_command(ser)
+                        if (y == "cancel"):
+                            break
+                        while not is_number_float(y):
+                            send_command(ser, GC_Address, "INPUT:Enter valid y Distance value")
+                            x = read_command(ser)  
+                        y = float(y)         
+
+                        fly_movment(master, x, y)                                
                         send_command(ser, GC_Address, "ACK:Has reach to the target distance")
                     case 2: #fly to a waypoint
                         try:
                             logging.info("Fly to a Waypoint")
                             send_command(ser, GC_Address, "INPUT:Enter Latitude:  ")
-                            waypoint_lat = read_command(ser)                        
+                            waypoint_lat = read_command(ser)      
+                            if (waypoint_lat == "cancel"):
+                                break                  
                             while not is_number_float(waypoint_lat):       
                                 send_command(ser, GC_Address, "INPUT:Enter Latitude:  ")
                                 waypoint_lat = read_command(ser)
@@ -133,23 +139,28 @@ try:
                         logging.info("Hover")
                         send_command(ser, GC_Address, "INPUT:Enter atitude:  ")
                         ALT = read_command(ser)
+                        if (ALT == "cancel"):
+                                break   
                         while not is_number_float(ALT):
                             send_command(ser, GC_Address, "INPUT:Enter atitude:  ")
                             ALT = read_command(ser)
                         ALT = float(ALT)
                         increse_alt(master, ALT )
-                    case 4: #return home
-                        logging.info("Return Home")
-                        fly_to_waypoint(master, home_lat, home_lon, altitude )
-                    case 5: #circle mode
+                    case 4: #circle mode
                         logging.info("Circle Mode")
                         send_command(ser, GC_Address, "INPUT:Enter Radius:  ")
                         Radius = read_command(ser)
+                        if (Radius == "cancel"):
+                                break   
                         while not is_number_float(Radius):
                             send_command(ser, GC_Address, "INPUT:Enter Radius:  ")
                             Radius = read_command(ser)
                         Radius = float(Radius)
                         fly_circle(master, Radius,altitude, 0) #clockwise
+                    case 5: #return home
+                        logging.info("Return Home")
+                        fly_to_waypoint(master, home_lat, home_lon, altitude )
+                    
                     case 6: #return home and land
                         try:
                             logging.info("Return Home and Land")
@@ -167,6 +178,8 @@ try:
                         logging.info("Change Altitude Value")
                         send_command(ser, GC_Address, "INPUT:Enter New Altitude Value:  ")
                         altitude = read_command(ser)
+                        if (altitude == "cancel"):
+                            break
                         while not is_number_float(altitude):
                             send_command(ser, GC_Address, "INPUT:Enter Altitude:  ")
                             altitude = read_command(ser)
@@ -177,6 +190,8 @@ try:
                             logging.info("Testing Commication Range")
                             send_command(ser, GC_Address, "INPUT:Enter Distance Range:  ")
                             Target_distance = read_command(ser)
+                            if (Target_distance == "cancel"):
+                                break
                             while not is_number_float(Target_distance):
                                 send_command(ser, GC_Address, "INPUT:Enter Distance Range:  ")
                                 Target_distance = read_command(ser)
