@@ -6,7 +6,7 @@ ser = None
 
 # Open serial port
 try:
-    ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=1)
+    ser = serial.Serial('/dev/ttyUSB1', 115200, timeout=1)
 except serial.SerialException as e:
     print(f"SerialException: {e}")
     exit()
@@ -55,7 +55,7 @@ def avg_distance(num_samples):
         dist = read_lidar_data()  # Call the function to get a distance measurement
         if dist is not None:  # Check if the measurement is valid
             distances.append(dist)
-        #time.sleep(0.01)  # Delay between measurements
+       
 
     if len(distances) == 0:
         return -1  # Return -1 if no valid distances were collected
@@ -75,11 +75,9 @@ def get_distance():
 if __name__ == "__main__":
     try:
         while True:
-            start_time = time.time()
+            
             distance = get_distance()
-            end_time = time.time()
-            total_time = end_time - start_time
-            print(total_time)
+          
             if distance != -1:
                 print(f"Distance: {distance} m")
             else:
