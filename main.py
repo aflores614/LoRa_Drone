@@ -24,7 +24,7 @@ setup_log_file()
 serial_port = '/dev/ttyUSB0'
 baud_rate = 115200  # Default baud rate for RYLR998
 GC_Address = 2
-altitude = 2 #defalut altitude
+altitude = 8 #defalut altitude
 
 
 

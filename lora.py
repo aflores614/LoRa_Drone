@@ -42,8 +42,8 @@ def set_parameter(ser,SF, BW, CR, Power ):
 
 def read_command(ser):
     try:
-        end_time = time.time() + 5
-        while time.time() < end_time: #10 seconds wait time
+        end_time = time.time() + 30
+        while time.time() < end_time: #30 seconds wait time
             string = ser.readline()
             c = string.decode("utf-8")
             if(c != ""):
