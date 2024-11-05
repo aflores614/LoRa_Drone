@@ -1,8 +1,10 @@
 import serial
 import time
-from collections import deque
+from threading import  Lock
 
 ser = None
+current_distance = None
+distance_lock = Lock()
 
 # Open serial port
 try:
@@ -62,16 +64,24 @@ def avg_distance(num_samples):
     average_distance = sum(distances) / len(distances)
     
     return round(average_distance, 2)
+
 def get_distance():
+    global current_distance
     num_sample = 100
     set_sample_rate(250)
-    distance = avg_distance(num_sample) 
-    if(distance == 0):
-        return 8
-    elif(distance < 0.3):
-        return 8
-    else:
-        return distance
+    while True:
+        distance = avg_distance(num_sample) 
+        if(distance < 0.25):  #lindar range is from 0.2 - 8.0 meters
+            distance = 8
+        with distance_lock:
+                current_distance = distance
+
+def get_current_distance():
+    with distance_lock:
+        return current_distance
+    
+
+
 if __name__ == "__main__":
     try:
         while True:

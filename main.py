@@ -3,8 +3,10 @@ import serial
 import time
 import sys
 import logging
+from picamzero import Camera
+from datetime import datetime
 from connect_to_vehicle import connect_to_vehicle
-from arm_drone import arm_drone, is_armed
+from arm_drone import arm_drone
 from disarm_drone import disarm_drone
 from lora import send_command, get_address, get_network, read_command,set_parameter
 from takeoff import takeoff
@@ -12,24 +14,26 @@ from set_movment import fly_movment, fly_to_waypoint, increse_alt,fly_circle
 from get_location import get_location
 from if_number import is_number_float, is_number_int
 from drone_menu import send_drone_flypath_menu
-from travel_distance import distance_travel
 from check_pre_arm import check_pre_arm
 from land import land
 from datetime import datetime
 from Range_Test import test_lora_comm_range
 from log_file import setup_log_file
+from lidar_distance import get_distance, get_current_distance
+from threading import Thread, Event
 
 setup_log_file()
-
+cam = Camera()
+stop_event = Event()
 serial_port = '/dev/ttyUSB0'
 baud_rate = 115200  # Default baud rate for RYLR998
 GC_Address = 2
 altitude = 8 #defalut altitude
-
-
-
-
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 ser = serial.Serial(serial_port, baud_rate, timeout=1)
+
+distance_thread = Thread(target=get_distance)
+distance_thread.start()
 
 try:
     ADDRESS = get_address(ser)
@@ -57,7 +61,10 @@ try:
             send_command(ser, GC_Address, "ERROR:Invalid input")
     
     master = connect_to_vehicle()
-    
+
+    cam.record_video(f"/home/pi/Drone_Test_Video/drone_video_{timestamp}", duration=None)
+    lidar = get_current_distance()
+    print(lidar)
     if master:
         send_command(ser, GC_Address, "INFO:Vehicle Connected")
 
@@ -224,6 +231,9 @@ except KeyboardInterrupt:
 finally:
     logging.info("Script Finish")
     send_command(ser, GC_Address, "INFO:FInish")
+    cam.stop()
+    stop_event.set()
+    distance_thread.join()
     ser.close()
     logging.shutdown() 
     sys.exit()
