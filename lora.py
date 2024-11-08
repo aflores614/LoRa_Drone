@@ -60,6 +60,8 @@ def read_command(ser):
         return "No input"
     except Exception as e:
         logging.info("Error Read command")
+
+
   
 if __name__ == "__main__":
     serial_port = '/dev/ttyUSB0'

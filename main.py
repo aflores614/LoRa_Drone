@@ -168,7 +168,15 @@ try:
                             send_command(ser, GC_Address, "INPUT:Enter Radius:  ")
                             Radius = read_command(ser)
                         Radius = float(Radius)
-                        fly_circle(master, Radius,altitude, 0) #clockwise
+                        send_command(ser, GC_Address, "INPUT:Enter 0 for Clock, 1 for Counter-Clock")
+                        dir = read_command(ser)
+                        if (dir == "cancel"):
+                            break
+                        while not is_number_int(dir):
+                            send_command(ser, GC_Address, "INPUT:Enter valid  x Distance value")
+                            dir = read_command(ser)  
+                        dir = int(x)  
+                        fly_circle(master, Radius,altitude, dir) #clockwise
                     case 5: #return home
                         logging.info("Return Home")
                         fly_to_waypoint(master, home_lat, home_lon, altitude )

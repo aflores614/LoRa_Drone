@@ -29,3 +29,6 @@ def land(master):
                 print("Drone has land ")
                 break   
         time.sleep(1)  
+
+
+   
