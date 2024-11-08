@@ -8,15 +8,31 @@ from get_location import get_location
 from travel_distance import distance_travel
 from fly_forward import get_waypoint
 from lora import send_command
+from lidar_distance import  get_current_distance
 
-serial_port = '/dev/ttyUSB0'
+
+serial_port = '/dev/ttyUSB1'
 baud_rate = 115200  # Default baud rate for RYLR998
 GC_Address = 2
 ser = serial.Serial(serial_port, baud_rate, timeout=1)
 check_interval = 0.1
 speed = 10 # drone spreed 10 m/s
 error = 0.5
+safe_distance = 3
 
+def STOP_FLY(master):   
+
+    master.mav.send(mavutil.mavlink.MAVLink_set_position_target_local_ned_message(10, master.target_system,  
+                                                                                 master.target_component, 
+                                                                                 mavutil.mavlink.MAV_FRAME_BODY_OFFSET_NED,
+                                                                                 int(0b110111111000 ), 
+                                                                                 0, 0, 0, 
+                                                                                 0, 0 , 0, 
+                                                                                 0, 0, 0, 
+                                                                                 0, 0 
+                                                                                ))
+                                                                                
+    msg = master.recv_match(type='COMMAND_ACK', blocking=True, timeout=5)
 
 def fly_movment(master, x, y):
    
@@ -35,13 +51,30 @@ def fly_movment(master, x, y):
                                                                                 ))
                                                                                 
     msg = master.recv_match(type='COMMAND_ACK', blocking=True, timeout=5)
-    if(x == 0):
-        time.sleep((abs(y) / speed  ) + error )   
-    elif(y == 0):
-        time.sleep( (abs(x) / speed) + error )
-    else:
-        time.sleep(((abs(x) + abs(y)) / speed) + error)
     
+    if(x == 0):
+        duration = ((abs(y) / speed  ) + error )   
+    elif(y == 0):
+        duration = ( (abs(x) / speed) + error )
+    else:
+        duration = (((abs(x) + abs(y)) / speed) + error)
+        
+    end_time = time.time() + duration + error
+    
+    while time.time() < end_time:
+        try:
+            distance = get_current_distance()
+        except Exception as e:
+            logging.info("Error trying to get current distance")
+            send_command(ser, GC_Address,"INFO:Error trying to get current distance")
+   
+        if distance < safe_distance:
+            STOP_FLY(master)
+            send_command(ser, GC_Address,"INFO:Obstacle Detected")
+            logging.info("Obstacle Detected")
+            break
+        
+        
 
     
 def fly_to_waypoint(master, lat, lon, ALT):
@@ -65,9 +98,20 @@ def fly_to_waypoint(master, lat, lon, ALT):
                 logging.info("Error trying to current location in fly_to_waypoint function")
                 send_command(ser, GC_Address,"INFO:GET_LOCATION in fly point fail")
                 print("ERROR TRYING TO GET CURRENT LOCATION")
+            try:
+                distance = get_current_distance()
+            except Exception as e:
+                logging.info("Error trying to get current distance")
+                send_command(ser, GC_Address,"INFO:Error trying to get current distance")
+                
+                
             lat_error = abs(abs(lat) - abs(current_lat))
             lon_error = abs(abs(lon) - abs(current_lon))              
             if time.time() - start_time < timeout:
+                if distance < safe_distance:
+                    STOP_FLY(master)
+                    send_command(ser, GC_Address,"INFO:Obstacle Detected")
+                    break
                 if(lat_error < tolerance and lon_error < tolerance ):
                     logging.info("Reach Target Position")
                     send_command(ser, GC_Address,"INFO:Reach Target Position")     
@@ -143,5 +187,5 @@ def fly_circle(master,radius,altitude,dir):
             logging.info("Point %f complete " % (i+1))
             message = "ACK:Circle Waypoint " + str(i+1) + "/" + str(num_waypoint) 
             send_command(ser, GC_Address, message)
-
-        
+   
+            

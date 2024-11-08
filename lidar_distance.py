@@ -8,7 +8,7 @@ distance_lock = Lock()
 
 # Open serial port
 try:
-    ser = serial.Serial('/dev/ttyUSB1', 115200, timeout=1)
+    ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=1)
 except serial.SerialException as e:
     print(f"SerialException: {e}")
     exit()

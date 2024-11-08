@@ -3,7 +3,8 @@ import serial
 import time
 import sys
 import logging
-from picamzero import Camera
+from picamera2 import Picamera2
+from picamera2.encoders import H264Encoder
 from datetime import datetime
 from connect_to_vehicle import connect_to_vehicle
 from arm_drone import arm_drone
@@ -23,9 +24,14 @@ from lidar_distance import get_distance, get_current_distance
 from threading import Thread, Event
 
 setup_log_file()
-cam = Camera()
+
+picam2 = Picamera2()
+video_config = picam2.create_video_configuration()
+picam2.configure(video_config)
+encoder = H264Encoder(10000000)
+
 stop_event = Event()
-serial_port = '/dev/ttyUSB0'
+serial_port = '/dev/ttyUSB1'
 baud_rate = 115200  # Default baud rate for RYLR998
 GC_Address = 2
 altitude = 8 #defalut altitude
@@ -61,10 +67,9 @@ try:
             send_command(ser, GC_Address, "ERROR:Invalid input")
     
     master = connect_to_vehicle()
-
-    cam.record_video(f"/home/pi/Drone_Test_Video/drone_video_{timestamp}", duration=None)
-    lidar = get_current_distance()
-    print(lidar)
+    picam2.start_recording(encoder, f"/home/pi/Drone_Test_Video/drone_video_{timestamp}.h264")
+    time.sleep(1) #time to set up camera
+    
     if master:
         send_command(ser, GC_Address, "INFO:Vehicle Connected")
 
@@ -230,8 +235,8 @@ except KeyboardInterrupt:
     send_command(ser, GC_Address, "INFO:User On Rasberry pi Cancel")
 finally:
     logging.info("Script Finish")
-    send_command(ser, GC_Address, "INFO:FInish")
-    cam.stop()
+    send_command(ser, GC_Address, "INFO:FInish")   
+    picam2.stop_recording()
     stop_event.set()
     distance_thread.join()
     ser.close()
