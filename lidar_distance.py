@@ -75,9 +75,10 @@ def get_distance():
             distance = 8
         with distance_lock:
                 current_distance = distance
-
+                
 def get_current_distance():
     with distance_lock:
+  
         return current_distance
     
 
