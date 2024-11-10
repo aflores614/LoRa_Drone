@@ -22,7 +22,7 @@ from Range_Test import test_lora_comm_range
 from log_file import setup_log_file
 from lidar_distance import get_distance, get_current_distance
 from threading import Thread, Event
-
+from Signal_Test import start_thread_singal_connection, stop_signal_connection_thread
 setup_log_file()
 
 picam2 = Picamera2()
@@ -34,10 +34,9 @@ stop_event = Event()
 serial_port = '/dev/ttyUSB1'
 baud_rate = 115200  # Default baud rate for RYLR998
 GC_Address = 2
-altitude = 8 #defalut altitude
+altitude = 2 #defalut altitude
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 ser = serial.Serial(serial_port, baud_rate, timeout=1)
-count = 0
 distance_thread = Thread(target=get_distance)
 distance_thread.start()
 
@@ -87,10 +86,11 @@ try:
                 send_command(ser, GC_Address, "INFO:Invalid input")  
         if check_pre_arm(master):            
             home_lat, home_lon, home_alt = get_location(master)
-            logging.info("Home Position: %f, %f, %f" % (home_lat, home_lon, home_alt))                        
+            logging.info("Home Position: %f, %f, %f" % (home_lat, home_lon, home_alt))  
+            signal_thread = start_thread_singal_connection(master, ser, home_lat, home_lon, GC_Address, altitude)
             arm_drone(master)
-            takeoff(master, altitude)           
-            
+            takeoff(master, altitude)                       
+            stop_signal_connection_thread()
         logging.info("Drone is Arm")
         send_command(ser, GC_Address, "INFO:Drone is armed!")        
     
@@ -151,7 +151,7 @@ try:
                         except Exception as e:
                             logging.error("Fly to a Waypoint ERROR: %s", str(e), exc_info=True)
                             send_command(ser, GC_Address, "INFO:Fly to a Waypoint ERROR")
-                        picam2.stop_recording()
+                    
                     case 3: #Hover 
                         logging.info("Hover")
                         
@@ -167,8 +167,7 @@ try:
                         time.sleep(2)
                        
                     case 4: #circle mode
-                        logging.info("Circle Mode")
-                        
+                        logging.info("Circle Mode")                        
                         send_command(ser, GC_Address, "INPUT:Enter Radius:  ")
                         Radius = read_command(ser)
                         if (Radius == "cancel"):
@@ -177,15 +176,16 @@ try:
                             send_command(ser, GC_Address, "INPUT:Enter Radius:  ")
                             Radius = read_command(ser)
                         Radius = float(Radius)
-                        send_command(ser, GC_Address, "INPUT:Enter 0 for Clock, 1 for Counter-Clock")
+
+                        send_command(ser, GC_Address, "INPUT:Enter 1 for Clock, 0 for Counter-Clock")
                         dir = read_command(ser)
                         if (dir == "cancel"):
                             continue
                         while not is_number_int(dir):
-                            send_command(ser, GC_Address, "INPUT:Enter valid  x Distance value")
+                            send_command(ser, GC_Address, "INPUT:Enter valid  direction value")
                             dir = read_command(ser)  
-                        dir = int(x)  
-                        fly_circle(master, Radius,altitude, dir) #clockwise
+                        dir = int(dir)  
+                        fly_circle(master, Radius,altitude, dir) 
                         
                     case 5: #return home
                         logging.info("Return Home")
