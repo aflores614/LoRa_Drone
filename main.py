@@ -3,7 +3,7 @@ import serial
 import time
 import sys
 import logging
-from picamera2 import Picamera2
+
 from picamera2.encoders import H264Encoder
 from datetime import datetime
 from connect_to_vehicle import connect_to_vehicle
@@ -25,17 +25,16 @@ from threading import Thread, Event
 from Signal_Test import start_thread_singal_connection, stop_signal_connection_thread
 setup_log_file()
 
-picam2 = Picamera2()
-video_config = picam2.create_video_configuration()
-picam2.configure(video_config)
-encoder = H264Encoder(10000000)
+
 
 stop_event = Event()
 serial_port = '/dev/ttyUSB1'
 baud_rate = 115200  # Default baud rate for RYLR998
 GC_Address = 2
-altitude = 2 #defalut altitude
+altitude = 8 #defalut altitude
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+time.sleep(1) #time to set up camera
 ser = serial.Serial(serial_port, baud_rate, timeout=1)
 distance_thread = Thread(target=get_distance)
 distance_thread.start()
@@ -66,8 +65,7 @@ try:
             send_command(ser, GC_Address, "ERROR:Invalid input")
     
     master = connect_to_vehicle()
-    picam2.start_recording(encoder, f"/home/pi/Drone_Test_Video/drone_video_{timestamp}.h264")
-    time.sleep(1) #time to set up camera
+    
     
     if master:
         send_command(ser, GC_Address, "INFO:Vehicle Connected")
@@ -87,7 +85,7 @@ try:
         if check_pre_arm(master):            
             home_lat, home_lon, home_alt = get_location(master)
             logging.info("Home Position: %f, %f, %f" % (home_lat, home_lon, home_alt))  
-            signal_thread = start_thread_singal_connection(master, ser, home_lat, home_lon, GC_Address, altitude)
+            signal_thread = start_thread_singal_connection(master, ser, home_lat, home_lon, GC_Address, altitude)            
             arm_drone(master)
             takeoff(master, altitude)                       
             stop_signal_connection_thread()
@@ -104,8 +102,7 @@ try:
                 
                 match int(drone_command):
                     case 1: #fly foward in meters 
-                        logging.info("Fly Movement")
-                        
+                        logging.info("Fly Movement")                        
                         send_command(ser, GC_Address, "INPUT:Enter X axis distance")
                         x = read_command(ser)
                         if (x == "cancel"):
@@ -123,8 +120,9 @@ try:
                             send_command(ser, GC_Address, "INPUT:Enter valid y Distance value")
                             y = read_command(ser)  
                         y = float(y)         
-
-                        fly_movment(master, x, y)                                
+                        signal_thread = start_thread_singal_connection(master, ser, home_lat, home_lon, GC_Address, altitude) 
+                        fly_movment(master, x, y)   
+                        stop_signal_connection_thread()                             
                         send_command(ser, GC_Address, "ACK:Has reach to the target distance")
                         
                     case 2: #fly to a waypoint
@@ -146,7 +144,7 @@ try:
                                 send_command(ser, GC_Address, "INPUT:Enter Longitude:  ")
                                 waypoint_lon = read_command(ser)
                             waypoint_lon = float(waypoint_lon)
-
+                            
                             fly_to_waypoint(master, waypoint_lat, waypoint_lon, altitude )
                         except Exception as e:
                             logging.error("Fly to a Waypoint ERROR: %s", str(e), exc_info=True)
@@ -184,9 +182,10 @@ try:
                         while not is_number_int(dir):
                             send_command(ser, GC_Address, "INPUT:Enter valid  direction value")
                             dir = read_command(ser)  
-                        dir = int(dir)  
+                        dir = int(dir) 
+                        signal_thread = start_thread_singal_connection(master, ser, home_lat, home_lon, GC_Address, altitude) 
                         fly_circle(master, Radius,altitude, dir) 
-                        
+                        stop_signal_connection_thread()
                     case 5: #return home
                         logging.info("Return Home")
                         
@@ -261,7 +260,7 @@ except KeyboardInterrupt:
 finally:
     logging.info("Script Finish")
     send_command(ser, GC_Address, "INFO:FInish")   
-    picam2.stop_recording()
+
     stop_event.set()
     distance_thread.join()
     ser.close()
