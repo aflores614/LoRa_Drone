@@ -3,7 +3,6 @@ import serial
 import time
 import sys
 import logging
-
 from picamera2.encoders import H264Encoder
 from datetime import datetime
 from connect_to_vehicle import connect_to_vehicle
@@ -23,9 +22,8 @@ from log_file import setup_log_file
 from lidar_distance import get_distance, get_current_distance
 from threading import Thread, Event
 from Signal_Test import start_thread_singal_connection, stop_signal_connection_thread
+
 setup_log_file()
-
-
 
 stop_event = Event()
 serial_port = '/dev/ttyUSB1'
@@ -33,8 +31,6 @@ baud_rate = 115200  # Default baud rate for RYLR998
 GC_Address = 2
 altitude = 8 #defalut altitude
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-
-time.sleep(1) #time to set up camera
 ser = serial.Serial(serial_port, baud_rate, timeout=1)
 distance_thread = Thread(target=get_distance)
 distance_thread.start()
@@ -161,7 +157,9 @@ try:
                             send_command(ser, GC_Address, "INPUT:Enter atitude:  ")
                             ALT = read_command(ser)
                         ALT = float(ALT)
-                        increse_alt(master, ALT )
+                        Increase_ALT = ALT - altitude
+                        altitude = ALT
+                        increse_alt(master, Increase_ALT)
                         time.sleep(2)
                        
                     case 4: #circle mode
@@ -206,20 +204,9 @@ try:
                     case 7: #land and break
                         logging.info("Land")                        
                         land(master)                        
-                        break
-                    case 8: #change alt value
-                        logging.info("Change Altitude Value")
-                        send_command(ser, GC_Address, "INPUT:Enter New Altitude Value:  ")
-                        altitude = read_command(ser)
-                        if (altitude == "cancel"):
-                            continue
-                        while not is_number_float(altitude):
-                            send_command(ser, GC_Address, "INPUT:Enter Altitude:  ")
-                            altitude = read_command(ser)
-                        altitude = float(altitude)  
+                        break                  
                        
-                        
-                    case 9:
+                    case 8:
                         try:
                             
                             logging.info("Testing Commication Range")

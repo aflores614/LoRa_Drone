@@ -18,7 +18,7 @@ ser = serial.Serial(serial_port, baud_rate, timeout=1)
 check_interval = 0.1
 speed = 10 # drone spreed 10 m/s
 error = 0.5
-safe_distance = 3
+safe_distance = 1.5
 
 def STOP_FLY(master):   
 
@@ -33,6 +33,22 @@ def STOP_FLY(master):
                                                                                 ))
                                                                                 
     msg = master.recv_match(type='COMMAND_ACK', blocking=True, timeout=5)
+
+def Fly_to_Safe_distance(master):   
+
+    master.mav.send(mavutil.mavlink.MAVLink_set_position_target_local_ned_message(10, master.target_system,  
+                                                                                 master.target_component, 
+                                                                                 mavutil.mavlink.MAV_FRAME_BODY_OFFSET_NED,
+                                                                                 int(0b110111111000 ), 
+                                                                                 0, 0, 0, 
+                                                                                 0, 0 , 0, 
+                                                                                 -speed, 0, 0, 
+                                                                                 0, 0 
+                                                                                ))
+                                                                                
+    msg = master.recv_match(type='COMMAND_ACK', blocking=True, timeout=5)
+    duration = ( (abs(safe_distance) / speed) + error )
+    time.sleep(duration)
 
 def fly_movment(master, x, y):
    
@@ -110,6 +126,7 @@ def fly_to_waypoint(master, lat, lon, ALT):
             if time.time() - start_time < timeout:
                 if distance < safe_distance:
                     STOP_FLY(master)
+                    Fly_to_Safe_distance(master)
                     send_command(ser, GC_Address,"INFO:Obstacle Detected")
                     break
                 if(lat_error < tolerance and lon_error < tolerance ):
