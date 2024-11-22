@@ -78,7 +78,7 @@ def test_lora_comm_range(master, ser, GC_Address, Target_distance, altitude, hom
         else:
             logging.info("Singal Loss") 
             signal_not_response += 1
-            if(signal_not_response == 5):           
+            if(signal_not_response == 1 ):           
                 return False
             time.sleep(1)
         distance += intervals
