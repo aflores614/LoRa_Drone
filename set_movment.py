@@ -18,7 +18,7 @@ ser = serial.Serial(serial_port, baud_rate, timeout=1)
 check_interval = 0.1
 speed = 10 # drone spreed 10 m/s
 error = 0.5
-safe_distance = 1.5
+safe_distance = 3
 
 def STOP_FLY(master):   
 
