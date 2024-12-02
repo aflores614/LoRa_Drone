@@ -1,3 +1,11 @@
+"""...........................................................
+-- Engineer: Andres Flores
+-- Description: function initiates the drone's landing procedure 
+-- by setting the mode to "LAND" and sending the appropriate 
+-- MAVLink command, while continuously monitoring the altitude 
+-- until the drone reaches a safe landing threshold
+................................................................"""
+
 from pymavlink import mavutil
 from set_mode import set_mode 
 import time

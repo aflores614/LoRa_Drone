@@ -1,3 +1,12 @@
+"""...........................................................
+-- Engineer: Andres Flores
+-- Description:  function to command a drone to ascend to a 
+-- specified altitude using the MAVLink protocol. It sets the 
+-- flight mode to GUIDED, sends a takeoff command
+-- (MAV_CMD_NAV_TAKEOFF), and monitors altitude through 
+-- GLOBAL_POSITION_INT messages until the target is reached 
+-- or a timeout occurs.
+................................................................"""
 from pymavlink import mavutil
 from set_mode import set_mode
 import time

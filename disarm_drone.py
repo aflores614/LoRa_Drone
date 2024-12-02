@@ -1,3 +1,7 @@
+"""...........................................................
+-- Engineer: Andres Flores
+-- Description: functions to disarm a drone
+................................................................"""
 from pymavlink import mavutil
 def disarm_drone(master):
         master.mav.command_long_send(

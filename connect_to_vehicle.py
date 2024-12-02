@@ -1,3 +1,8 @@
+"""...........................................................
+-- Engineer: Andres Flores
+-- Description: establish a MAVLink connection to a drone via 
+-- a specified serial port and baud rate using the pymavlink library
+................................................................"""
 from pymavlink import mavutil
 # Connect to the vehicle on the specified serial port and baud rate
 def connect_to_vehicle():

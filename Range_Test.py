@@ -1,14 +1,18 @@
+"""...........................................................
+-- Engineer: Andres Flores
+-- Description:script tests the communication range of a LoRa 
+-- system integrated with a drone using MAVLink for navigation. 
+-- It generates waypoints at set intervals along the desired 
+-- target distance and guides the drone to each point 
+................................................................"""
 from pymavlink import mavutil
 import serial
 import time
-import sys
 import logging
 from connect_to_vehicle import connect_to_vehicle
-from lora import send_command
-from get_location import get_location
-from travel_distance import distance_travel
-from set_movment import fly_movment, fly_to_waypoint
-from fly_forward import get_waypoint
+from LoRa_Commands import send_command
+from get_location import get_location, get_waypoint
+from set_movment import  fly_to_waypoint
 from datetime import datetime
 
 check_interval = 0.5

@@ -1,3 +1,8 @@
+"""...........................................................
+-- Engineer: Andres Flores
+-- Description: function sets up a log file with a timestamped 
+-- filename and configures logging to record drone test information
+................................................................"""
 from datetime import datetime
 import logging
 

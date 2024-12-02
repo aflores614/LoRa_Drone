@@ -1,3 +1,10 @@
+"""...........................................................
+-- Engineer: Andres Flores
+-- Description: function changes the drone's mode to the 
+-- specified mode and confirms the change by waiting for 
+-- an acknowledgment from the system
+................................................................"""
+
 from pymavlink import mavutil
 import time
 # Function to change the mode

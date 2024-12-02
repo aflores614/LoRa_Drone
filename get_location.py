@@ -1,10 +1,17 @@
+"""...........................................................
+-- Engineer: Andres Flores
+-- Description:cript retrieves the GPS location of a drone 
+-- using MAVLink commands while monitoring the health of GPS data. 
+-- If valid GPS data is unavailable after multiple attempts, it 
+-- initiates an emergency landing and logs the issue, ensuring 
+-- safety during operation also calculate new coordinate waypoints
+................................................................"""
 from pymavlink import mavutil
-import time
-from lora import send_command
+from LoRa_Commands import send_command
 import serial
-import sys
 from land import land
 import logging
+import math
 
 num_try = 0
 max_try = 10
@@ -49,5 +56,19 @@ def get_location(master):
             send_command(ser, GC_Address, "INFO:GPS NOT Responding")           
             send_command(ser, GC_Address, "INFO:EMERGENCY Landing")
 
+def get_waypoint(master, distance, angle):
+    lat,lon, alt = get_location(master)     
+    Earth_R = 6378137.0
+
+    lat = math.radians(lat)
+    lon = math.radians(lon)
+    offset = distance/Earth_R
+    New_lat = lat + (offset * math.cos(angle))
+    New_lon = lon + (offset * (math.sin(angle)/math.cos(lat)))
+
+    New_lat = math.degrees(New_lat) 
+    New_lon = math.degrees(New_lon) 
+
+    return New_lat, New_lon
 
             

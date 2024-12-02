@@ -1,14 +1,20 @@
+"""...........................................................
+-- Engineer: Andres Flores
+-- Description: The main script facilitates the connection between 
+-- a ground control system and a drone, enabling commands for 
+-- autonomous navigation, flight patterns, and telemetry exchange 
+-- via LoRa communication
+................................................................"""
 from pymavlink import mavutil
 import serial
 import time
 import sys
 import logging
-from picamera2.encoders import H264Encoder
 from datetime import datetime
 from connect_to_vehicle import connect_to_vehicle
 from arm_drone import arm_drone
 from disarm_drone import disarm_drone
-from lora import send_command, get_address, get_network, read_command,set_parameter
+from LoRa_Commands import send_command, get_address, get_network, read_command,set_parameter
 from takeoff import takeoff
 from set_movment import fly_movment, fly_to_waypoint, increse_alt,fly_circle
 from get_location import get_location
@@ -29,7 +35,7 @@ stop_event = Event()
 serial_port = '/dev/ttyUSB1'
 baud_rate = 115200  # Default baud rate for RYLR998
 GC_Address = 2
-altitude = 1.5 #defalut altitude
+altitude = 8 #defalut altitude
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 ser = serial.Serial(serial_port, baud_rate, timeout=1)
 distance_thread = Thread(target=get_distance)
@@ -157,9 +163,9 @@ try:
                             send_command(ser, GC_Address, "INPUT:Enter atitude:  ")
                             ALT = read_command(ser)
                         ALT = float(ALT)
-                        Increase_ALT = ALT - altitude
+                        ALT_Change = ALT - altitude
                         altitude = ALT
-                        increse_alt(master, Increase_ALT)
+                        increse_alt(master, ALT_Change)
                         time.sleep(2)
                        
                     case 4: #circle mode

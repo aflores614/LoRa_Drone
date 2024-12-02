@@ -1,3 +1,9 @@
+"""...........................................................
+-- Engineer: Andres Flores
+-- Description: functions to arm a drone and check its armed 
+-- status using the MAVLink protocol via the pymavlink library
+................................................................"""
+
 from pymavlink import mavutil
 from connect_to_vehicle import connect_to_vehicle
 import time
@@ -12,9 +18,6 @@ def arm_drone(master):
         21196, 0, 0, 0, 0, 0                     
     )
     time.sleep(5)
-
-  
-    
     
 def is_armed(master):
     # Request the current system status

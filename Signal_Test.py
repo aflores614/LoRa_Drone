@@ -1,14 +1,19 @@
+"""...........................................................
+-- Engineer: Andres Flores
+-- Description: script performs a signal connection test for
+-- a drone using LoRa communication, with a thread that monitors 
+-- the signal and triggers a safe landing if the connection is lost
+................................................................"""
 from pymavlink import mavutil
 import time
 import serial
 import sys
 from connect_to_vehicle import connect_to_vehicle
-from lora import send_command
 from set_movment import  fly_to_waypoint
 from land import land
 from get_location import get_location
 import threading
-from lora import send_command, get_address, get_network, read_command,set_parameter
+from LoRa_Commands import send_command, get_address, get_network, read_command,set_parameter
 
 thread_stop_event = threading.Event()
 

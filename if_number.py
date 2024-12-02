@@ -1,3 +1,7 @@
+"""...........................................................
+-- Engineer: Andres Flores
+-- Description:  functions check whether a given value can be converted to a float or an integer
+................................................................"""
 def is_number_float(value):
     try:
         float(value)

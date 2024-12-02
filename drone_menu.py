@@ -1,4 +1,9 @@
-from lora import send_command, read_command
+"""...........................................................
+-- Engineer: Andres Flores
+-- Description: sends a menu of flight path options to a drone 
+-- via LoRa communication, allowing the operator to choose
+................................................................"""
+from LoRa_Commands import send_command, read_command
 import serial
 def send_drone_flypath_menu(ser,GC_Address):
     send_command(ser, GC_Address, "INFO:1 = FLY Movement")

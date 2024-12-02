@@ -1,3 +1,12 @@
+"""...........................................................
+-- Engineer: Andres Flores
+-- Description: script interfaces with a TF-Luna LiDAR sensor 
+-- to measure and calculate distances by reading data via a 
+-- serial connection, while allowing configuration of the 
+-- sample rate. It provides functionality to continuously 
+-- collect distance samples, average them, and return the 
+-- current distance in a thread-safe manner
+................................................................"""
 import serial
 import time
 from threading import  Lock

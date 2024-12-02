@@ -1,13 +1,28 @@
+"""...........................................................
+-- Engineer: Andres Flores
+-- Description: set of drone control functions leveraging 
+-- MAVLink for precise and autonomous operations. It includes 
+-- obstacle detection and safe-distance management using LiDAR, 
+-- ensuring the drone halts and backs away when obstacles are 
+-- encountered (STOP_FLY and Fly_to_Safe_distance). For manual 
+-- movement, the script supports velocity and direction control 
+-- with dynamic adjustments (fly_movment). It facilitates waypoint 
+-- navigation by guiding the drone to specified GPS coordinates, 
+-- continuously monitoring for proximity hazards during 
+-- flight (fly_to_waypoint). Altitude adjustments can be performed 
+-- incrementally to reach desired heights safely (increse_alt). 
+-- Additionally, the script enables the drone to follow a circular 
+-- flight path, generating waypoints and navigating them in clockwise
+-- or counterclockwise directions (fly_circle).
+................................................................"""
+
 from pymavlink import mavutil
 import logging
 import math
 import time
 import serial
-from lidar_distance import get_distance
-from get_location import get_location
-from travel_distance import distance_travel
-from fly_forward import get_waypoint
-from lora import send_command
+from get_location import get_location, get_waypoint
+from LoRa_Commands import send_command
 from lidar_distance import  get_current_distance
 
 

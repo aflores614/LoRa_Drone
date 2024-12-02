@@ -1,8 +1,13 @@
+"""...........................................................
+-- Engineer: Andres Flores
+-- Description: interfacing with a LoRa module using AT 
+-- commands via a serial connection. It is designed for 
+-- managing communication parameters, sending and receiving 
+-- commands, and configuring LoRa settings
+................................................................"""
 import serial
 import time
 import logging
-
-
 
 def send_command(ser, ADDRESS, command):
     try:

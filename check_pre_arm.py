@@ -1,3 +1,10 @@
+"""...........................................................
+-- Engineer: Andres Flores
+-- Description: function checks for a valid GPS lock or position 
+-- information from the vehicle's telemetry before allowing the 
+-- pre-arm sequence to proceed
+................................................................"""
+
 from pymavlink import mavutil
 # Function to check pre-arm status
 def check_pre_arm(master):
