@@ -29,7 +29,7 @@ stop_event = Event()
 serial_port = '/dev/ttyUSB1'
 baud_rate = 115200  # Default baud rate for RYLR998
 GC_Address = 2
-altitude = 8 #defalut altitude
+altitude = 1.5 #defalut altitude
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 ser = serial.Serial(serial_port, baud_rate, timeout=1)
 distance_thread = Thread(target=get_distance)

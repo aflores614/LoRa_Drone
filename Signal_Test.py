@@ -13,8 +13,8 @@ from lora import send_command, get_address, get_network, read_command,set_parame
 thread_stop_event = threading.Event()
 
 def rx_test(ser):
-    end_time = time.time() + 0.5
-    while time.time() < end_time: #10 seconds wait time
+    end_time = time.time() + 1
+    while time.time() < end_time: #1 seconds wait time
         string = ser.readline()
         c = string.decode("utf-8")    
         if c != "" and c.startswith('+RCV='):
@@ -40,7 +40,7 @@ def signal_connection(master, ser, home_lat, home_lon, GC_Address, altitude):
         print(signal_connect)
         if(signal_connect == False):
             signal_loss += 1            
-            if ( signal_loss == 5):
+            if ( signal_loss == 2):
                 print("loss Connection")
                 fly_to_waypoint(master, home_lat, home_lon, altitude )
                 land(master)

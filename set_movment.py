@@ -86,6 +86,7 @@ def fly_movment(master, x, y):
    
         if distance < safe_distance:
             STOP_FLY(master)
+            Fly_to_Safe_distance(master)
             send_command(ser, GC_Address,"INFO:Obstacle Detected")
             logging.info("Obstacle Detected")
             break
